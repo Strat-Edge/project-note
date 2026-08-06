@@ -13,19 +13,21 @@ function requireEnv(name: string): string {
   return value;
 }
 
-// Client scopé à la session utilisateur (clé anonyme) — soumis aux policies RLS (AD-4).
+// Client scopé à la session utilisateur (clé publiable — remplace l'ancienne clé "anon",
+// dépréciée fin 2026) — soumis aux policies RLS (AD-4).
 export function createSupabaseClient() {
   return createClient(
     requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    requireEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
   );
 }
 
-// Client à privilèges élevés (clé service role) — contourne RLS. Réservé aux opérations serveur
-// qui l'exigent explicitement (ex. Render Cron pour les rappels, FR-36). À utiliser avec parcimonie.
+// Client à privilèges élevés (clé secrète — remplace l'ancienne "service_role", dépréciée fin 2026)
+// — contourne RLS. Réservé aux opérations serveur qui l'exigent explicitement
+// (ex. Render Cron pour les rappels, FR-36). À utiliser avec parcimonie.
 export function createSupabaseServiceClient() {
   return createClient(
     requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
+    requireEnv("SUPABASE_SECRET_KEY"),
   );
 }

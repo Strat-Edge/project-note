@@ -4,7 +4,7 @@ baseline_commit: NO_VCS
 
 # Story 1.1: Initialisation et déploiement du projet
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -29,13 +29,13 @@ so that je dispose d'une base fonctionnelle sur laquelle construire toutes les f
   - [x] Créer les dossiers vides `domain/`, `data/local/`, `data/remote/`, `sync/`, `components/` avec un fichier `index.ts` minimal ou `.gitkeep` — respecter dès maintenant AD-2 (voir Dev Notes) même si aucune logique n'y vit encore
   - [x] Ajouter un `README.md` court à la racine rappelant la règle de dépendance AD-2 (domain/ ne dépend de rien ; data/remote/ jamais dans le bundle client)
   - [x] Créer `.env.example` listant toutes les variables attendues (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` ; noter en commentaire que `OPENAI_API_KEY` et `VAPID_*` seront ajoutées en Epic 5/Epic 7) et `.env.local` réel (gitignoré) pour le développement local
-- [ ] Task 2: Configurer le projet Supabase dédié (AC: #3) — **BLOQUÉ partiellement, cf. Dev Agent Record**
-  - [ ] ⏸️ Guillaume crée manuellement un nouveau projet Supabase (séparé de toute autre infra existante) — **action humaine, hors périmètre d'un agent** ; récupérer URL projet + clé anonyme + clé service role, les placer dans `.env.local`
+- [x] Task 2: Configurer le projet Supabase dédié (AC: #3)
+  - [x] Guillaume crée manuellement un nouveau projet Supabase (séparé de toute autre infra existante, région Europe) — projet `pxdmtnysvglorwchwsmc` créé, clé publiable + clé secrète (nouveau système Supabase, remplace anon/service_role) placées dans `.env.local`, connectivité vérifiée (REST API + Storage API)
   - [x] Ajouter `@supabase/supabase-js` en version `2.112.0`
-  - [x] Créer un client Supabase scopé (`data/remote/client.ts`), gardé par `server-only` (AD-2/AD-6) — session anonyme + client service role séparé
-  - [ ] ⏸️ Créer deux buckets Supabase Storage : `documents` et `audio` — nécessite le projet créé
+  - [x] Créer un client Supabase scopé (`data/remote/client.ts`), gardé par `server-only` (AD-2/AD-6) — client publiable + client secret séparé
+  - [x] Créer deux buckets Supabase Storage : `documents` et `audio` — créés, vérifiés privés (`public: false`) via l'API Storage
   - [x] Documenter (`data/remote/index.ts`) la règle non-négociable : toute migration SQL doit inclure `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;` **avant** toute politique — aucune table n'est créée sans RLS actif
-  - [ ] ⏸️ Activer dans le dashboard Supabase l'option "Enable RLS on new tables" (Authentication → Policies) — nécessite le projet créé
+  - [x] Activer "Activer le RLS automatique" à la création du projet — confirmé présent dans le schéma (fonction `rls_auto_enable`)
 - [x] Task 3: Initialiser Dexie et le stockage persistant (AC: #4)
   - [x] Ajouter `dexie` en version `4.4.4`
   - [x] Initialiser la base Dexie dans `data/local/` (schéma vide pour l'instant — les tables sont ajoutées par les stories qui en ont besoin, jamais toutes d'un coup)
@@ -48,12 +48,12 @@ so that je dispose d'une base fonctionnelle sur laquelle construire toutes les f
   - [x] `.gitignore` : ajouté `public/sw*` et `public/swe-worker*`
   - [x] Créé `app/manifest.ts` (convention App Router, équivalent typé à `manifest.json`) — nom "Project Note", `display: standalone`, icône SVG placeholder neutre (`public/icon-placeholder.svg`) — logo réel Strat'Edge arrive en Story 1.3
   - [x] Ajouté `applicationName`, `appleWebApp`, `viewport` (export séparé `Viewport`) à `app/layout.tsx`
-- [ ] Task 5: Déployer sur Render (AC: #1) — **BLOQUÉ, cf. Dev Agent Record**
+- [x] Task 5: Déployer sur Render (AC: #1)
   - [x] Vérifié en local : `npm run build` puis `npm run start` répondent HTTP 200 sur `http://localhost:3000` — l'app est prête à déployer
-  - [ ] ⏸️ Guillaume crée le Web Service Render et le connecte au dépôt — **action humaine, hors périmètre d'un agent**
-  - [x] Build command : `npm run build` (inclut `--webpack`, requis par Serwist — cf. Dev Agent Record) — Start command : `npm run start` (jamais `output: 'export'`, l'app a des route handlers/Server Actions qui exigent un process Node)
-  - [ ] ⏸️ Renseigner les variables d'environnement serveur sur Render : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (les clés `OPENAI_API_KEY`/`VAPID_*` seront ajoutées par les stories qui en ont besoin — Epic 5 et Epic 7 — pas ici)
-  - [ ] ⏸️ Vérifier que l'URL publique Render répond HTTP 200 après déploiement
+  - [x] Guillaume crée le Web Service Render (palier Starter, sans mise en veille) et le connecte au dépôt `Strat-Edge/project-note`
+  - [x] Build command : `npm install && npm run build` (Render n'enchaîne pas `npm install` automatiquement avant un Build Command custom — premier déploiement a échoué avec `next: not found` jusqu'à correction, cf. Dev Agent Record) — Start command : `npm run start`
+  - [x] Variables d'environnement renseignées sur Render : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` (les clés `OPENAI_API_KEY`/`VAPID_*` seront ajoutées par les stories qui en ont besoin — Epic 5 et Epic 7 — pas ici)
+  - [x] Vérifié : `https://project-note-1ble.onrender.com/` (HTTP 200), `/manifest.webmanifest` (HTTP 200), `/sw.js` (HTTP 200)
 
 ## Dev Notes
 
@@ -124,16 +124,19 @@ Claude Sonnet 5 (claude-sonnet-5)
 - `npm run build` a ensuite planté sur un conflit Turbopack/webpack : Serwist injecte une config webpack alors que Next.js 16 utilise Turbopack par défaut, et les deux ne sont pas encore compatibles (issue ouverte trackée par Serwist). Résolu en forçant webpack via le flag `--webpack` sur les scripts `dev`/`build`.
 - `app/sw.ts` a ensuite planté sur deux imports incorrects (`installSerwist` depuis `@serwist/sw` inexistant, `defaultCache` depuis `@serwist/next/browser` — chemin d'export inexistant dans le package réellement installé). Corrigé après vérification directe des `exports` du package installé et de la doc officielle à jour : l'API réelle du 9.5.11 est `new Serwist({...}).addEventListeners()`, avec `defaultCache` exporté depuis `@serwist/next/worker`.
 - ESLint lintait par défaut tout le repo, y compris les scripts BMad (`_bmad/`, `.claude/`) et le service worker généré (`public/sw.js`) — ajout d'ignores explicites dans `eslint.config.mjs`.
+- Supabase a récemment remplacé les clés `anon`/`service_role` (JWT, dépréciées fin 2026) par de nouvelles clés `publishable`/`secret` (format opaque `sb_publishable_...`/`sb_secret_...`) — vérifié via la doc officielle avant de nommer les variables d'environnement, pour éviter de partir sur une convention déjà obsolète. `data/remote/client.ts` et `.env.example` utilisent `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`/`SUPABASE_SECRET_KEY`, pas les noms legacy.
+- Premier déploiement Render a échoué (`sh: 1: next: not found`, exit 127) : le Build Command custom (`npm run build`) n'enclenche pas `npm install` automatiquement sur Render. Corrigé en changeant le Build Command en `npm install && npm run build`.
+- Les buckets Supabase Storage avaient d'abord été créés en `Documents`/`Audio` (majuscule) — renommés en `documents`/`audio` (minuscule) pour matcher exactement ce que le code et l'architecture attendent (Supabase Storage est sensible à la casse).
 
 ### Completion Notes List
 
 - ✅ Task 1 (scaffold Next.js/TS + arborescence + README + env) — complet, build et lint vérifiés.
+- ✅ Task 2 (Supabase) — complet. Projet dédié `pxdmtnysvglorwchwsmc` créé (région Europe, RLS automatique activé), clés publiable/secrète en place, connectivité vérifiée via l'API REST, buckets `documents`/`audio` créés et confirmés privés via l'API Storage, client scopé + client secret créés (`data/remote/client.ts`, gardés par `server-only`).
 - ✅ Task 3 (Dexie + stockage persistant) — complet.
-- ✅ Task 4 (Serwist/PWA) — complet ; manifest + service worker générés et vérifiés au build (`/manifest.webmanifest`, `public/sw.js`).
-- ⚠️ Task 2 (Supabase) — **partiellement bloqué**. Fait : dépendance installée, client scopé + client service role créés (`data/remote/client.ts`, gardés par `server-only` pour AD-2/AD-6), règle RLS documentée. **Reste à faire par Guillaume** : créer le projet Supabase dédié, remplir `.env.local`, créer les buckets `documents`/`audio`, activer "Enable RLS on new tables" dans le dashboard — aucune de ces actions n'est réalisable par un agent (nécessite un compte/dashboard cloud).
-- ⚠️ Task 5 (Render) — **bloqué**. Fait : build/start vérifiés en local (HTTP 200), commandes de build/start confirmées. **Reste à faire par Guillaume** : créer le Web Service Render, connecter le dépôt, renseigner les variables d'environnement serveur, vérifier l'URL publique — nécessite un compte/dashboard cloud.
-- **Recommandation de suivi (hors périmètre de cette story)** : envisager de documenter dans `ARCHITECTURE-SPINE.md` que le pin TypeScript 7.0.2 (AD-8) est actuellement contourné par une rétrogradation locale à 6.0.3 pour cause d'incompatibilité `typescript-eslint`, à relever vers 7.x une fois le correctif amont disponible (~octobre 2026). Je n'ai pas modifié le Spine moi-même, cette story ne touche que les fichiers autorisés.
-- **Story non terminée** : deux tâches restent bloquées sur une action humaine (création de comptes cloud, hors périmètre d'un agent). Statut conservé à `in-progress`, pas de passage à `review`.
+- ✅ Task 4 (Serwist/PWA) — complet ; manifest + service worker générés et vérifiés au build (`/manifest.webmanifest`, `public/sw.js`), et re-vérifiés en production sur Render (HTTP 200 sur les deux).
+- ✅ Task 5 (Render) — complet. Web Service Starter (sans mise en veille) créé, connecté à `Strat-Edge/project-note`, build/start corrigés et fonctionnels, variables d'environnement renseignées. URL publique `https://project-note-1ble.onrender.com` vérifiée HTTP 200 (page d'accueil, manifest, service worker).
+- **Recommandation de suivi (hors périmètre de cette story)** : le pin TypeScript 7.0.2 (AD-8) est actuellement contourné par une rétrogradation locale à 6.0.3 pour cause d'incompatibilité `typescript-eslint`, à relever vers 7.x une fois le correctif amont disponible (~octobre 2026). Je n'ai pas modifié `ARCHITECTURE-SPINE.md` moi-même (cette story ne touche que les fichiers autorisés) — à faire lors d'une prochaine story ou par une mise à jour dédiée de la spine.
+- **Toutes les tâches et critères d'acceptation sont satisfaits.** Aucune régression détectée (build + lint propres, déploiement vérifié en production).
 
 ### File List
 
@@ -147,7 +150,7 @@ Claude Sonnet 5 (claude-sonnet-5)
 - `package.json`, `package-lock.json` (nom du package, `typescript` 6.0.3, scripts `--webpack`, dépendances `dexie`/`@serwist/next`/`serwist`/`@supabase/supabase-js`/`server-only`)
 - `next.config.ts` (wrapper Serwist)
 - `tsconfig.json` (types Serwist, lib webworker, exclude sw.js)
-- `.gitignore` (exclusions Serwist)
+- `.gitignore` (exclusions Serwist ; correction : `.env.example` doit rester versionné malgré le pattern générique `.env*`, `.claude/settings.local.json` exclu — config personnelle, pas destinée à être partagée)
 - `eslint.config.mjs` (ignores BMad + sw.js)
 - `README.md` (remplacé le README générique par la doc projet + règles AD-2)
 - `app/layout.tsx` (lang="fr", StorageInit monté, métadonnées PWA)
@@ -156,4 +159,4 @@ Claude Sonnet 5 (claude-sonnet-5)
 
 ## Change Log
 
-- 2026-08-06 : Implémentation initiale (Tasks 1, 3, 4 complets ; Tasks 2 et 5 partiellement bloqués sur action humaine — cf. Completion Notes). Statut conservé à `in-progress`.
+- 2026-08-06 : Implémentation initiale (Tasks 1, 3, 4 complets en autonomie ; Tasks 2 et 5 finalisées en binôme avec Guillaume pour les étapes cloud — création du projet Supabase, des buckets, du service Render). Toutes les tâches complètes, tous les AC vérifiés en production. Statut passé à `review`.
