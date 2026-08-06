@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Écran clé — Général (Calendrier) — Light</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/*
+  SCREEN 1/3 — "Général" (calendrier), thème CLAIR.
+
+  Gouverné par :
+  DESIGN.md →
+    - colors (jeu clair complet : primary/secondary/bg/bg-alt/border/header-bg/
+      header-text/text/heading/muted) + colors.project-1..8 (rotation projet)
+    - typography (display/heading/body/label/caption/micro, police système)
+    - rounded (sm/md/lg/xl/full/DEFAULT)
+    - spacing (échelle base-4, gutter, card-gap)
+    - components.segmented-control (switcher niveau 1 Général/Projets)
+    - components.meta-pill / components.priority-chip (indicateur priorité
+      calendrier — même code visuel que la puce de priorité des cartes)
+    - components.fab
+    - components.project-color.rotation (8 teintes, hors bleu de marque)
+  EXPERIENCE.md →
+    - Information Architecture (switcher fixe sous header, contenu change en dessous)
+    - Component Patterns → "Puce de priorité (calendrier)" : n'affecte jamais
+      la position dans la grille (FR-32)
+    - State Patterns → "Calendrier sans échéance" (grille normale, pas d'erreur)
+    - Responsive & Platform → desktop : switcher centré, largeur contrainte ;
+      vue mois par défaut sur desktop
+    - Voice and Tone → vouvoiement, factuel, aucun point d'exclamation/emoji
+
+  HEX VALUES USED (vérifiés contre DESIGN.md) :
+    --primary        #2F80ED
+    --secondary      #56A3FF
+    --bg             #F4F7FB
+    --bg-alt         #E9EEF5
+    --border         #D5DCE5
+    --header-bg      #0F2A44
+    --header-text    #FFFFFF
+    --text           #2B2F33
+    --heading        #0F2A44
+    --muted          #7A8594
+    --priority-haute       #2F80ED
+    --priority-haute-text  #FFFFFF
+    --project-1  #2F9E44   --project-2  #E8590C   --project-3  #9C36B5
+    --project-4  #E64980   --project-5  #F08C00   --project-6  #0CA678
+    --project-7  #C2255C   --project-8  #495057
+*/
+:root{
+  --primary:#2F80ED;
+  --secondary:#56A3FF;
+  --bg:#F4F7FB;
+  --bg-alt:#E9EEF5;
+  --border:#D5DCE5;
+  --header-bg:#0F2A44;
+  --header-text:#FFFFFF;
+  --text:#2B2F33;
+  --heading:#0F2A44;
+  --muted:#7A8594;
+
+  --priority-haute:#2F80ED;
+  --priority-haute-text:#FFFFFF;
+
+  --project-1:#2F9E44;
+  --project-2:#E8590C;
+  --project-3:#9C36B5;
+  --project-4:#E64980;
+  --project-5:#F08C00;
+  --project-6:#0CA678;
+  --project-7:#C2255C;
+  --project-8:#495057;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --rounded-sm:6px;
+  --rounded-md:9px;
+  --rounded-lg:12px;
+  --rounded-xl:16px;
+  --rounded-full:9999px;
+  --rounded-default:10px;
+
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-7:32px; --sp-8:40px;
+  --gutter:20px; --card-gap:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:#DCE3ED;
+  font-family:var(--font);
+  color:var(--text);
+}
+
+/* ---------- App shell ---------- */
+.app-shell{
+  max-width:1000px;
+  margin:0 auto;
+  background:var(--bg);
+  min-height:860px;
+  box-shadow:0 10px 40px rgba(15,42,68,.18);
+}
+
+/* ---------- Header ---------- */
+.app-header{
+  background:var(--header-bg);
+  color:var(--header-text);
+  padding:18px var(--gutter) 16px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.logo-mark{
+  width:28px;height:28px;
+  border-radius:var(--rounded-sm);
+  background:var(--primary);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;color:#fff;
+  flex:none;
+}
+.logo-word{
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:.2px;
+  color:#fff;
+}
+.logo-word b{ color:var(--secondary); font-weight:800; }
+
+/* ---------- Segmented control — niveau 1 (Général / Projets) ---------- */
+/* DESIGN.md components.segmented-control ; centré, largeur contrainte en desktop (EXPERIENCE.md Responsive & Platform) */
+.switcher-bar{
+  background:var(--bg);
+  padding:var(--sp-4) var(--gutter) var(--sp-3);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:center;
+}
+.segmented{
+  display:flex;
+  width:340px;
+  background:var(--bg-alt);
+  border-radius:var(--rounded-xl);
+  padding:var(--sp-1);
+  gap:var(--sp-1);
+}
+.segmented .seg{
+  flex:1;
+  text-align:center;
+  padding:9px 0;
+  border-radius:var(--rounded-lg);
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:.3px;
+  color:var(--muted);
+}
+.segmented .seg.active{
+  background:var(--primary);
+  color:#FFFFFF;
+  box-shadow:0 3px 10px rgba(47,128,237,.35);
+}
+
+/* ---------- Content ---------- */
+.content{
+  padding:var(--sp-6) var(--gutter) var(--sp-8);
+  max-width:900px;
+  margin:0 auto;
+}
+
+.cal-toolbar{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom:var(--sp-5);
+  gap:var(--sp-4);
+}
+.cal-title h1{
+  margin:0;
+  font-size:16.5px;
+  font-weight:700;
+  line-height:1.3;
+  color:var(--heading);
+}
+.cal-title p{
+  margin:4px 0 0;
+  font-size:10.5px;
+  font-weight:600;
+  color:var(--muted);
+}
+.cal-toolbar-actions{
+  display:flex;
+  align-items:center;
+  gap:var(--sp-3);
+}
+.btn-ghost-sm{
+  border:1px solid var(--border);
+  color:var(--muted);
+  border-radius:var(--rounded-md);
+  padding:8px 14px;
+  font-size:12.5px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.cal-nav{
+  display:flex;
+  align-items:center;
+  gap:var(--sp-3);
+}
+.cal-nav .month-label{
+  font-size:13.5px;
+  font-weight:700;
+  color:var(--heading);
+  min-width:110px;
+  text-align:center;
+  letter-spacing:.3px;
+}
+.cal-nav .arrow{
+  width:26px;height:26px;
+  border-radius:var(--rounded-sm);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);
+  font-size:13px;
+  background:#fff;
+}
+
+.weekday-row{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  text-align:center;
+  margin-bottom:var(--sp-2);
+}
+.weekday-row span{
+  font-size:9.5px;
+  font-weight:800;
+  letter-spacing:.4px;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+.cal-cell{
+  background:#FFFFFF;
+  border:1px solid var(--border);
+  border-radius:var(--rounded-sm);
+  padding:8px 8px 10px;
+  min-height:82px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.cal-cell.muted{
+  background:var(--bg-alt);
+}
+.cal-cell.today{
+  border:1.5px solid var(--primary);
+}
+.cal-daynum{
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:.3px;
+  color:var(--text);
+}
+.cal-cell.muted .cal-daynum{ color:var(--muted); }
+.cal-cell.today .cal-daynum{
+  color:#fff;
+  background:var(--primary);
+  width:20px;height:20px;
+  border-radius:var(--rounded-full);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;
+}
+
+.cal-dots{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  flex-wrap:wrap;
+  margin-top:auto;
+}
+.cal-dots i{
+  width:7px;height:7px;
+  border-radius:var(--rounded-full);
+  display:block;
+  flex:none;
+}
+/* Puce de priorité (calendrier) — même code visuel que priority-chip des cartes,
+   miniaturisée pour la grille. Purement visuelle : n'affecte jamais la position (FR-32). */
+.cal-dots .prio-mini{
+  width:12px;height:12px;
+  border-radius:4px;
+  background:var(--priority-haute);
+  color:var(--priority-haute-text);
+  font-size:7px;
+  font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  flex:none;
+}
+
+/* ---------- Legend — rotation des couleurs de projet ---------- */
+.cal-legend{
+  margin-top:var(--sp-6);
+  padding-top:var(--sp-4);
+  border-top:1px solid var(--border);
+}
+.cal-legend-title{
+  font-size:10.5px;
+  font-weight:700;
+  letter-spacing:.3px;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-bottom:var(--sp-3);
+}
+.cal-legend-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:var(--sp-3) var(--sp-5);
+}
+.cal-legend-grid .item{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--text);
+}
+.cal-legend-grid .item i{
+  width:11px;height:11px;
+  border-radius:var(--rounded-sm);
+  flex:none;
+}
+
+/* ---------- FAB ---------- */
+/* DESIGN.md components.fab — persistant sur tout écran avec contenu (EXPERIENCE.md) */
+.app-shell{ position:relative; }
+.fab{
+  position:absolute;
+  right:28px;
+  bottom:28px;
+  width:56px;height:56px;
+  border-radius:var(--rounded-xl);
+  background:var(--primary);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;
+  font-weight:300;
+  box-shadow:0 10px 24px rgba(47,128,237,.45);
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="app-header">
+    <div class="logo-mark">S</div>
+    <div class="logo-word">Strat<b>'</b>Edge</div>
+  </div>
+
+  <div class="switcher-bar">
+    <div class="segmented">
+      <div class="seg active">Général</div>
+      <div class="seg">Projets</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="cal-toolbar">
+      <div class="cal-title">
+        <h1>Calendrier général</h1>
+        <p>Toutes les échéances, tous projets confondus</p>
+      </div>
+      <div class="cal-toolbar-actions">
+        <div class="btn-ghost-sm">+ Nouveau projet</div>
+        <div class="cal-nav">
+          <div class="arrow">‹</div>
+          <div class="month-label">AOÛT 2026</div>
+          <div class="arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="weekday-row">
+      <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+    </div>
+
+    <div class="cal-grid">
+      <!-- Row 1 : 27–31 juillet, 1–2 août -->
+      <div class="cal-cell muted"><span class="cal-daynum">27</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">28</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">29</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">30</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">31</span></div>
+      <div class="cal-cell"><span class="cal-daynum">1</span></div>
+      <div class="cal-cell"><span class="cal-daynum">2</span></div>
+
+      <!-- Row 2 : 3–9 août (4 = aujourd'hui) -->
+      <div class="cal-cell"><span class="cal-daynum">3</span></div>
+      <div class="cal-cell today"><span class="cal-daynum">4</span></div>
+      <div class="cal-cell">
+        <span class="cal-daynum">5</span>
+        <div class="cal-dots"><i style="background:var(--project-1)"></i></div>
+      </div>
+      <div class="cal-cell"><span class="cal-daynum">6</span></div>
+      <div class="cal-cell">
+        <span class="cal-daynum">7</span>
+        <div class="cal-dots">
+          <i style="background:var(--project-3)"></i>
+          <i style="background:var(--project-6)"></i>
+        </div>
+      </div>
+      <div class="cal-cell"><span class="cal-daynum">8</span></div>
+      <div class="cal-cell"><span class="cal-daynum">9</span></div>
+
+      <!-- Row 3 : 10–16 août -->
+      <div class="cal-cell"><span class="cal-daynum">10</span></div>
+      <div class="cal-cell"><span class="cal-daynum">11</span></div>
+      <div class="cal-cell">
+        <span class="cal-daynum">12</span>
+        <div class="cal-dots">
+          <i style="background:var(--project-2)"></i>
+          <span class="prio-mini" title="Priorité Haute">H</span>
+        </div>
+      </div>
+      <div class="cal-cell"><span class="cal-daynum">13</span></div>
+      <div class="cal-cell">
+        <span class="cal-daynum">14</span>
+        <div class="cal-dots"><i style="background:var(--project-4)"></i></div>
+      </div>
+      <div class="cal-cell"><span class="cal-daynum">15</span></div>
+      <div class="cal-cell"><span class="cal-daynum">16</span></div>
+
+      <!-- Row 4 : 17–23 août -->
+      <div class="cal-cell"><span class="cal-daynum">17</span></div>
+      <div class="cal-cell"><span class="cal-daynum">18</span></div>
+      <div class="cal-cell">
+        <span class="cal-daynum">19</span>
+        <div class="cal-dots"><i style="background:var(--project-5)"></i></div>
+      </div>
+      <div class="cal-cell"><span class="cal-daynum">20</span></div>
+      <div class="cal-cell">
+        <span class="cal-daynum">21</span>
+        <div class="cal-dots">
+          <i style="background:var(--project-1)"></i>
+          <i style="background:var(--project-4)"></i>
+        </div>
+      </div>
+      <div class="cal-cell"><span class="cal-daynum">22</span></div>
+      <div class="cal-cell"><span class="cal-daynum">23</span></div>
+
+      <!-- Row 5 : 24–30 août -->
+      <div class="cal-cell"><span class="cal-daynum">24</span></div>
+      <div class="cal-cell"><span class="cal-daynum">25</span></div>
+      <div class="cal-cell">
+        <span class="cal-daynum">26</span>
+        <div class="cal-dots"><i style="background:var(--project-6)"></i></div>
+      </div>
+      <div class="cal-cell"><span class="cal-daynum">27</span></div>
+      <div class="cal-cell">
+        <span class="cal-daynum">28</span>
+        <div class="cal-dots">
+          <i style="background:var(--project-2)"></i>
+          <i style="background:var(--project-3)"></i>
+        </div>
+      </div>
+      <div class="cal-cell"><span class="cal-daynum">29</span></div>
+      <div class="cal-cell"><span class="cal-daynum">30</span></div>
+
+      <!-- Row 6 : 31 août, 1–6 septembre -->
+      <div class="cal-cell"><span class="cal-daynum">31</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">1</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">2</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">3</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">4</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">5</span></div>
+      <div class="cal-cell muted"><span class="cal-daynum">6</span></div>
+    </div>
+
+    <div class="cal-legend">
+      <div class="cal-legend-title">Projets</div>
+      <div class="cal-legend-grid">
+        <div class="item"><i style="background:var(--project-1)"></i>Formation Vente B2B — Session Automne</div>
+        <div class="item"><i style="background:var(--project-2)"></i>Refonte outil facturation interne</div>
+        <div class="item"><i style="background:var(--project-3)"></i>Prospection nouveaux clients — Q4</div>
+        <div class="item"><i style="background:var(--project-4)"></i>Atelier organisation client Dupont Instruments</div>
+        <div class="item"><i style="background:var(--project-5)"></i>Formation sécurité incendie — équipe</div>
+        <div class="item"><i style="background:var(--project-6)"></i>Tableau de bord projets — outil interne</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fab">+</div>
+
+</div>
+
+</body>
+</html>

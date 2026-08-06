@@ -1,0 +1,379 @@
+<!--
+  DIRECTION 2 — "Crisp Systematic" (DARK MODE variant)
+
+  Rationale: A tight, app-like system of cards, chips and uppercase micro-
+  labels with real elevation (shadows) — built for someone triaging ~10
+  projects who wants scannable structure, not prose. This file renders the
+  DARK theme to prove the direction holds up there, since dark/light parity
+  is a hard requirement. It reads as "serious software," which is exactly
+  the credibility signal Guillaume wants a client to pick up on.
+
+  DARK TOKEN APPROACH: hand-authored dark tokens, not an auto-invert of the
+  light palette. Auto-inverting #F4F7FB would produce a washed, purplish
+  grey with no relation to the brand; instead the dark neutrals below are
+  tonal derivations of the existing brand navy (#0F2A44) and muted grey
+  (#7A8594) — darker/lighter shades of those same hues, not new brand
+  colours. --primary (#2F80ED) and --secondary (#56A3FF) are reused
+  UNCHANGED as accents, since both already sit comfortably on a dark navy
+  surface without needing a separate dark-mode accent.
+-->
+<style>
+  /*
+    HEX VALUES USED IN THIS DIRECTION:
+    Brand tokens, applied as-is:
+      --primary    #2F80ED  (active states, primary buttons, priority=Haute)
+      --secondary  #56A3FF  (project accent, priority=Normale, links)
+      --header-bg  #0F2A44  (header — same in light & dark per brand spec)
+      --header-tx  #FFFFFF  (header text)
+      --border-lt  #D5DCE5  (used sparingly, e.g. disabled radio ring)
+    Dark neutrals derived as tonal shades of #0F2A44 / #7A8594 (documented,
+    not invented brand hues — required because the brand spec only defines
+    light neutrals):
+      --bg-dark      #0A1B2E
+      --surface-dark #13293F
+      --surface-2    #1B3350
+      --border-dark  #2B4560
+      --text-dark    #E7ECF3
+      --muted-dark   #93A4B8
+  */
+  :root{
+    --primary:#2F80ED;
+    --secondary:#56A3FF;
+    --header-bg:#0F2A44;
+    --header-tx:#FFFFFF;
+    --border-lt:#D5DCE5;
+    --bg-dark:#0A1B2E;
+    --surface-dark:#13293F;
+    --surface-2:#1B3350;
+    --border-dark:#2B4560;
+    --text-dark:#E7ECF3;
+    --muted-dark:#93A4B8;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#050D16;font-family:var(--font);color:var(--text-dark);}
+  .page{padding:40px 32px 80px;}
+  .callout{
+    max-width:940px;margin:0 auto 40px;background:var(--surface-dark);border:1px solid var(--border-dark);
+    border-left:4px solid var(--primary);padding:18px 22px;border-radius:10px;
+    font-size:13.5px;line-height:1.55;color:var(--text-dark);
+  }
+  .callout b{color:#fff;font-size:13px;letter-spacing:.6px;text-transform:uppercase;display:block;margin-bottom:6px;}
+  .stage{display:flex;gap:36px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .col{display:flex;flex-direction:column;align-items:center;}
+  .frame-label{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted-dark);margin-bottom:10px;}
+
+  .device{
+    width:375px;height:812px;background:var(--bg-dark);border-radius:22px;
+    border:1px solid var(--border-dark);overflow:hidden;position:relative;
+    display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.55);
+  }
+  .statusbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 22px 4px;font-size:12px;color:#fff;background:var(--header-bg);
+    font-variant-numeric:tabular-nums;font-weight:600;
+  }
+
+  /* ---- Header ---- */
+  .app-header{background:var(--header-bg);color:var(--header-tx);padding:14px 20px 18px;}
+  .logo-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .logo-mark{
+    width:22px;height:22px;border-radius:6px;background:var(--primary);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;
+  }
+  .logo-word{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:#AFC6E4;}
+  .project-row{display:flex;align-items:center;gap:10px;}
+  .project-accent{width:10px;height:10px;border-radius:3px;background:var(--secondary);flex:none;}
+  .project-name{font-size:16.5px;font-weight:700;line-height:1.3;color:#fff;}
+
+  /* ---- Segmented control (systematic pill) ---- */
+  .tabs{display:flex;gap:4px;padding:12px 20px;background:var(--bg-dark);}
+  .tab{
+    flex:1;text-align:center;padding:9px 0;font-size:12.5px;font-weight:700;color:var(--muted-dark);
+    background:var(--surface-dark);border-radius:9px;border:1px solid var(--border-dark);
+  }
+  .tab.active{color:#fff;background:var(--primary);border-color:var(--primary);box-shadow:0 4px 12px rgba(47,128,237,.4);}
+
+  /* ---- Filters ---- */
+  .filters{display:flex;gap:10px;padding:2px 20px 14px;}
+  .filter{
+    display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--muted-dark);
+    background:var(--surface-dark);border:1px solid var(--border-dark);border-radius:8px;padding:6px 10px;
+  }
+  .filter.on{color:#fff;border-color:var(--primary);}
+  .chk{width:13px;height:13px;border:1.5px solid var(--muted-dark);border-radius:4px;position:relative;flex:none;}
+  .chk.on{border-color:var(--primary);background:var(--primary);}
+  .chk.on::after{content:"";position:absolute;left:2.5px;top:0px;width:4px;height:7px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg);}
+
+  /* ---- Task list (cards with elevation) ---- */
+  .list{flex:1;overflow-y:auto;padding:2px 16px 16px;display:flex;flex-direction:column;gap:10px;}
+  .task{
+    background:var(--surface-dark);border:1px solid var(--border-dark);border-radius:12px;
+    padding:13px 14px;box-shadow:0 4px 14px rgba(0,0,0,.35);position:relative;
+  }
+  .badge-new{
+    position:absolute;top:-5px;right:-5px;width:11px;height:11px;border-radius:50%;
+    background:var(--primary);border:2px solid var(--bg-dark);box-shadow:0 0 0 2px rgba(47,128,237,.35);
+  }
+  .task-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .task-title{font-size:13.5px;font-weight:600;color:var(--text-dark);line-height:1.35;}
+  .task-title.done{color:var(--muted-dark);text-decoration:line-through;}
+  .prio-chip{
+    flex:none;width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+    font-size:9.5px;font-weight:800;color:#fff;
+  }
+  .prio-chip.haute{background:var(--primary);}
+  .prio-chip.normale{background:var(--secondary);color:#0F2A44;}
+  .prio-chip.basse{background:var(--surface-2);color:var(--muted-dark);border:1px solid var(--border-dark);}
+  .task-meta{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap;}
+  .meta-pill{
+    display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--muted-dark);
+    background:var(--surface-2);border-radius:6px;padding:3px 7px;
+  }
+  .meta-pill svg{width:11px;height:11px;stroke:var(--muted-dark);}
+  .meta-pill.overdue{color:#fff;background:var(--primary);}
+  .status-row{margin-top:10px;display:flex;background:var(--surface-2);border-radius:8px;padding:2px;}
+  .status-opt{flex:1;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--muted-dark);padding:5px 0;border-radius:6px;}
+  .status-opt.active{background:var(--primary);color:#fff;}
+  .status-opt.active.done-state{background:var(--secondary);color:#0F2A44;}
+
+  .fab{
+    position:absolute;right:18px;bottom:20px;width:56px;height:56px;border-radius:16px;
+    background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:26px;font-weight:300;box-shadow:0 10px 24px rgba(47,128,237,.55);
+  }
+
+  /* ---- Secondary: capture step 2/3 ---- */
+  .capture{padding:20px 18px 0;flex:1;display:flex;flex-direction:column;}
+  .back-row{display:flex;align-items:center;gap:6px;color:var(--muted-dark);font-size:12px;font-weight:600;margin-bottom:16px;}
+  .steps{display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--surface-dark);border:1px solid var(--border-dark);border-radius:10px;padding:10px 12px;}
+  .step{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted-dark);display:flex;align-items:center;gap:6px;}
+  .step-num{width:16px;height:16px;border-radius:50%;background:var(--surface-2);color:var(--muted-dark);font-size:9px;display:flex;align-items:center;justify-content:center;}
+  .step.done .step-num{background:var(--secondary);color:#0F2A44;}
+  .step.current{color:#fff;}
+  .step.current .step-num{background:var(--primary);color:#fff;}
+  .step-line{flex:1;height:1px;background:var(--border-dark);margin:0 8px;}
+  .project-chip{
+    display:flex;align-items:center;gap:8px;background:var(--surface-dark);border:1px solid var(--border-dark);
+    border-radius:10px;padding:10px 12px;margin-bottom:22px;font-size:12px;font-weight:600;color:var(--text-dark);
+  }
+  .project-chip .dot{width:9px;height:9px;background:var(--secondary);border-radius:3px;flex:none;}
+  .capture h2{font-size:19px;font-weight:800;color:#fff;margin:0 0 18px;}
+  .prio-options{display:flex;flex-direction:column;gap:10px;}
+  .prio-opt{
+    display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--border-dark);
+    border-radius:12px;background:var(--surface-dark);
+  }
+  .prio-opt.selected{border-color:var(--primary);background:var(--surface-2);box-shadow:0 0 0 1px var(--primary);}
+  .prio-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex:none;}
+  .prio-icon.haute{background:var(--primary);}
+  .prio-icon.normale{background:var(--secondary);color:#0F2A44;}
+  .prio-icon.basse{background:var(--surface-2);color:var(--muted-dark);border:1px solid var(--border-dark);}
+  .prio-text{flex:1;}
+  .prio-text .name{font-size:14px;font-weight:700;color:#fff;}
+  .prio-text .desc{font-size:11px;color:var(--muted-dark);margin-top:2px;}
+  .radio{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-dark);flex:none;position:relative;}
+  .radio.on{border-color:var(--primary);}
+  .radio.on::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--primary);}
+  .capture-actions{display:flex;gap:10px;margin-top:auto;padding:18px 0 22px;}
+  .btn{flex:1;text-align:center;padding:13px;border-radius:10px;font-size:13px;font-weight:700;}
+  .btn-ghost{border:1px solid var(--border-dark);color:var(--muted-dark);}
+  .btn-primary{background:var(--primary);color:#fff;box-shadow:0 8px 18px rgba(47,128,237,.45);}
+
+  /* ---- Empty state ---- */
+  .empty-wrap{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:0 36px;text-align:center;}
+  .empty-icon{
+    width:64px;height:64px;border-radius:16px;background:var(--surface-dark);border:1px solid var(--border-dark);
+    display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  }
+  .empty-icon svg{width:28px;height:28px;stroke:var(--muted-dark);}
+  .empty-wrap h3{font-size:15px;font-weight:700;color:#fff;margin:0 0 8px;}
+  .empty-wrap p{font-size:12px;color:var(--muted-dark);line-height:1.55;margin:0;}
+</style>
+
+<div class="page">
+  <div class="callout">
+    <b>Crisp Systematic — Dark Mode</b>
+    Cartes, puces et libellés en petites capitales avec une vraie profondeur (ombres). Registre "logiciel pro" net et
+    quadrillé, pensé pour trier rapidement entre dix projets. Ce fichier montre le thème sombre pour vérifier qu'il
+    tient la route&nbsp;: voir le bloc de tokens dans le commentaire de style pour l'approche retenue.
+  </div>
+
+  <div class="stage">
+    <div class="col">
+      <div class="frame-label">Vue projet — Tâches</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="app-header">
+          <div class="logo-row">
+            <div class="logo-mark">S</div>
+            <div class="logo-word">Strat'Edge</div>
+          </div>
+          <div class="project-row">
+            <div class="project-accent"></div>
+            <div class="project-name">Formation Vente B2B — Session Automne</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active">Tâches</div>
+          <div class="tab">Documents</div>
+          <div class="tab">Notes</div>
+        </div>
+        <div class="filters">
+          <div class="filter on"><div class="chk on"></div>Chronologique</div>
+          <div class="filter"><div class="chk"></div>Prioritaire</div>
+        </div>
+        <div class="list">
+          <div class="task">
+            <div class="badge-new"></div>
+            <div class="task-top">
+              <div class="task-title">Préparer les slides module 3</div>
+              <div class="prio-chip haute">H</div>
+            </div>
+            <div class="task-meta">
+              <span class="meta-pill">12 août</span>
+              <span class="meta-pill"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>téléphone</span>
+            </div>
+            <div class="status-row">
+              <div class="status-opt active">à faire</div>
+              <div class="status-opt">en cours</div>
+              <div class="status-opt">terminé</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-top">
+              <div class="task-title">Relancer le client pour la date de session</div>
+              <div class="prio-chip normale">N</div>
+            </div>
+            <div class="task-meta">
+              <span class="meta-pill">8 août</span>
+              <span class="meta-pill"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>téléphone</span>
+            </div>
+            <div class="status-row">
+              <div class="status-opt">à faire</div>
+              <div class="status-opt active">en cours</div>
+              <div class="status-opt">terminé</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="badge-new"></div>
+            <div class="task-top">
+              <div class="task-title">Réserver la salle de formation</div>
+              <div class="prio-chip basse">B</div>
+            </div>
+            <div class="task-meta">
+              <span class="meta-pill">15 août</span>
+              <span class="meta-pill"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>ordinateur</span>
+            </div>
+            <div class="status-row">
+              <div class="status-opt active">à faire</div>
+              <div class="status-opt">en cours</div>
+              <div class="status-opt">terminé</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-top">
+              <div class="task-title">Envoyer le devis mis à jour</div>
+              <div class="prio-chip haute">H</div>
+            </div>
+            <div class="task-meta">
+              <span class="meta-pill overdue">29 juillet · en retard</span>
+              <span class="meta-pill"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>ordinateur</span>
+            </div>
+            <div class="status-row">
+              <div class="status-opt active">à faire</div>
+              <div class="status-opt">en cours</div>
+              <div class="status-opt">terminé</div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-top">
+              <div class="task-title done">Vérifier le matériel audio</div>
+              <div class="prio-chip basse">B</div>
+            </div>
+            <div class="task-meta">
+              <span class="meta-pill">18 août</span>
+              <span class="meta-pill"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>téléphone</span>
+            </div>
+            <div class="status-row">
+              <div class="status-opt">à faire</div>
+              <div class="status-opt">en cours</div>
+              <div class="status-opt active done-state">terminé</div>
+            </div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="frame-label">Capture — Étape 2/3 · Priorité</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="capture">
+          <div class="back-row">&larr; Retour</div>
+          <div class="steps">
+            <div class="step done"><div class="step-num">✓</div>Projet</div>
+            <div class="step-line"></div>
+            <div class="step current"><div class="step-num">2</div>Priorité</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="step-num">3</div>Type</div>
+          </div>
+          <div class="project-chip"><div class="dot"></div>Formation Vente B2B — Session Automne</div>
+          <h2>Quelle est la priorité ?</h2>
+          <div class="prio-options">
+            <div class="prio-opt haute">
+              <div class="prio-icon haute">H</div>
+              <div class="prio-text"><div class="name">Haute</div><div class="desc">À traiter en priorité</div></div>
+              <div class="radio"></div>
+            </div>
+            <div class="prio-opt selected">
+              <div class="prio-icon normale">N</div>
+              <div class="prio-text"><div class="name">Normale</div><div class="desc">Rythme habituel</div></div>
+              <div class="radio on"></div>
+            </div>
+            <div class="prio-opt basse">
+              <div class="prio-icon basse">B</div>
+              <div class="prio-text"><div class="name">Basse</div><div class="desc">Peut attendre</div></div>
+              <div class="radio"></div>
+            </div>
+          </div>
+          <div class="capture-actions">
+            <div class="btn btn-ghost">Retour</div>
+            <div class="btn btn-primary">Continuer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="frame-label">Notes — état vide</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="app-header">
+          <div class="logo-row">
+            <div class="logo-mark">S</div>
+            <div class="logo-word">Strat'Edge</div>
+          </div>
+          <div class="project-row">
+            <div class="project-accent"></div>
+            <div class="project-name">Formation Vente B2B — Session Automne</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab">Tâches</div>
+          <div class="tab">Documents</div>
+          <div class="tab active">Notes</div>
+        </div>
+        <div class="empty-wrap">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+          </div>
+          <h3>Aucune note pour l'instant</h3>
+          <p>Les notes prises sur ce projet apparaîtront ici.<br>Touchez + pour en créer une.</p>
+        </div>
+        <div class="fab">+</div>
+      </div>
+    </div>
+  </div>
+</div>

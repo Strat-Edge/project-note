@@ -1,0 +1,390 @@
+<!--
+  DIRECTION 3 — "Warm Confident Rounded" (light mode)
+
+  Rationale: Generous corner radii, soft shadows and icon-based priority
+  badges give this a friendly, tactile confidence — approachable without
+  being playful. It suits a solo consultant's personal tool (nothing about
+  it feels corporate-cold) while still reading as deliberate, well-crafted
+  software if a client glances at the screen during a session. Whitespace
+  stays generous per the "épuré" brief even with the larger shape language.
+-->
+<style>
+  /*
+    HEX VALUES USED IN THIS DIRECTION (all locked brand tokens, no invented hues):
+    --primary   #2F80ED  (primary buttons, active tab pill, Haute badge)
+    --secondary #56A3FF  (project accent, Normale badge, hover)
+    --bg        #F4F7FB  (device / page background)
+    --bg-alt    #E9EEF5  (card fill, Basse badge background, chips)
+    --border    #D5DCE5  (card borders, dividers)
+    --header-bg #0F2A44  (header background)
+    --header-tx #FFFFFF  (header text)
+    --text      #2B2F33  (body text)
+    --muted     #7A8594  (meta / secondary text)
+    --heading   #0F2A44  (headings)
+    The brief's "red dot" suggestion is replaced with a rounded pill chip
+    reading "Nouveau" in --primary-on-white — red isn't in the palette, and
+    a filled pill fits this direction's rounded shape language better than
+    a bare dot would.
+  */
+  :root{
+    --primary:#2F80ED;
+    --secondary:#56A3FF;
+    --bg:#F4F7FB;
+    --bg-alt:#E9EEF5;
+    --border:#D5DCE5;
+    --header-bg:#0F2A44;
+    --header-tx:#FFFFFF;
+    --text:#2B2F33;
+    --muted:#7A8594;
+    --heading:#0F2A44;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#E3E9F1;font-family:var(--font);color:var(--text);}
+  .page{padding:40px 32px 80px;}
+  .callout{
+    max-width:920px;margin:0 auto 40px;background:#fff;border:1px solid var(--border);
+    border-left:5px solid var(--secondary);padding:20px 24px;border-radius:18px;
+    font-size:13.5px;line-height:1.6;color:var(--text);box-shadow:0 8px 24px rgba(15,42,68,.06);
+  }
+  .callout b{color:var(--heading);font-size:15px;font-weight:800;display:block;margin-bottom:5px;}
+  .stage{display:flex;gap:36px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .col{display:flex;flex-direction:column;align-items:center;}
+  .frame-label{font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:10px;}
+
+  .device{
+    width:375px;height:812px;background:var(--bg);border-radius:34px;
+    border:1px solid var(--border);overflow:hidden;position:relative;
+    display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(15,42,68,.18);
+  }
+  .statusbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 24px 4px;font-size:12px;color:#fff;background:var(--header-bg);
+    font-variant-numeric:tabular-nums;font-weight:600;
+  }
+
+  /* ---- Header ---- */
+  .app-header{background:var(--header-bg);color:var(--header-tx);padding:16px 22px 20px;border-radius:0 0 22px 22px;}
+  .logo-row{display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+  .logo-mark{
+    width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,var(--secondary),var(--primary));
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;
+  }
+  .logo-word{font-size:12px;font-weight:700;letter-spacing:.6px;color:#CFE0F5;}
+  .project-row{display:flex;align-items:center;gap:10px;}
+  .project-accent{width:12px;height:12px;border-radius:50%;background:var(--secondary);flex:none;}
+  .project-name{font-size:17px;font-weight:700;line-height:1.3;color:#fff;}
+
+  /* ---- Segmented control (rounded pill) ---- */
+  .tabs{display:flex;gap:4px;margin:14px 20px 10px;background:var(--bg-alt);border-radius:16px;padding:4px;}
+  .tab{flex:1;text-align:center;padding:9px 0;font-size:13px;font-weight:700;color:var(--muted);border-radius:12px;}
+  .tab.active{color:#fff;background:var(--primary);box-shadow:0 6px 14px rgba(47,128,237,.35);}
+
+  /* ---- Filters ---- */
+  .filters{display:flex;gap:8px;padding:2px 20px 14px;}
+  .filter{
+    display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text);
+    background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:7px 12px;
+  }
+  .filter.on{border-color:var(--primary);color:var(--primary);background:#EEF5FF;}
+  .chk{width:15px;height:15px;border:1.6px solid var(--border);border-radius:50%;position:relative;flex:none;}
+  .chk.on{border-color:var(--primary);background:var(--primary);}
+  .chk.on::after{content:"";position:absolute;left:3.5px;top:1px;width:4px;height:7px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg);}
+
+  /* ---- Task list ---- */
+  .list{flex:1;overflow-y:auto;padding:4px 18px 18px;display:flex;flex-direction:column;gap:12px;}
+  .task{
+    background:#fff;border:1px solid var(--border);border-radius:20px;
+    padding:15px 16px;box-shadow:0 10px 24px rgba(15,42,68,.06);
+  }
+  .task-top{display:flex;align-items:flex-start;gap:12px;}
+  .prio-badge{
+    flex:none;width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  }
+  .prio-badge.haute{background:var(--primary);}
+  .prio-badge.normale{background:var(--secondary);}
+  .prio-badge.basse{background:var(--bg-alt);border:1.5px solid var(--border);}
+  .prio-badge svg{width:16px;height:16px;stroke:#fff;}
+  .prio-badge.basse svg{stroke:var(--muted);}
+  .task-main{flex:1;min-width:0;}
+  .task-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .task-title{font-size:14.5px;font-weight:700;color:var(--heading);line-height:1.35;}
+  .task-title.done{color:var(--muted);text-decoration:line-through;font-weight:600;}
+  .pill-new{
+    font-size:10px;font-weight:800;color:#fff;background:var(--primary);border-radius:20px;
+    padding:2.5px 8px;white-space:nowrap;
+  }
+  .task-meta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .meta-chip{
+    display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--muted);
+    background:var(--bg-alt);border-radius:10px;padding:4px 9px;
+  }
+  .meta-chip svg{width:12px;height:12px;stroke:var(--muted);}
+  .meta-chip.overdue{color:#fff;background:var(--primary);}
+  .status-pill-row{margin-top:11px;display:flex;gap:6px;}
+  .status-pill{flex:1;text-align:center;font-size:10.5px;font-weight:700;color:var(--muted);background:var(--bg-alt);border-radius:20px;padding:6px 0;}
+  .status-pill.active{background:var(--heading);color:#fff;}
+  .status-pill.active.termine{background:var(--secondary);color:#0F2A44;}
+
+  .fab{
+    position:absolute;right:20px;bottom:24px;width:60px;height:60px;border-radius:20px;
+    background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:28px;font-weight:300;box-shadow:0 14px 28px rgba(47,128,237,.5);
+  }
+
+  /* ---- Secondary: capture step 2/3 ---- */
+  .capture{padding:22px 20px 0;flex:1;display:flex;flex-direction:column;}
+  .back-row{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;font-weight:600;margin-bottom:16px;}
+  .steps{display:flex;align-items:center;margin-bottom:22px;}
+  .step-circle{width:26px;height:26px;border-radius:50%;background:var(--bg-alt);color:var(--muted);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .step-circle.done{background:var(--secondary);color:#0F2A44;}
+  .step-circle.current{background:var(--primary);color:#fff;}
+  .step-line{flex:1;height:3px;background:var(--bg-alt);border-radius:2px;margin:0 6px;}
+  .step-line.done{background:var(--secondary);}
+  .project-chip{
+    display:flex;align-items:center;gap:9px;background:#fff;border:1.5px solid var(--border);
+    border-radius:16px;padding:11px 14px;margin-bottom:24px;font-size:12.5px;font-weight:600;color:var(--text);
+    box-shadow:0 6px 16px rgba(15,42,68,.05);
+  }
+  .project-chip .dot{width:10px;height:10px;background:var(--secondary);border-radius:50%;flex:none;}
+  .capture h2{font-size:21px;font-weight:800;color:var(--heading);margin:0 0 20px;}
+  .prio-options{display:flex;flex-direction:column;gap:12px;}
+  .prio-opt{
+    display:flex;align-items:center;gap:14px;padding:16px;border:1.5px solid var(--border);
+    border-radius:18px;background:#fff;box-shadow:0 6px 16px rgba(15,42,68,.05);
+  }
+  .prio-opt.selected{border-color:var(--primary);background:#EEF5FF;box-shadow:0 10px 22px rgba(47,128,237,.18);}
+  .prio-icon{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none;}
+  .prio-icon.haute{background:var(--primary);}
+  .prio-icon.normale{background:var(--secondary);}
+  .prio-icon.basse{background:var(--bg-alt);border:1.5px solid var(--border);}
+  .prio-icon svg{width:18px;height:18px;stroke:#fff;}
+  .prio-icon.basse svg{stroke:var(--muted);}
+  .prio-text{flex:1;}
+  .prio-text .name{font-size:15.5px;font-weight:800;color:var(--heading);}
+  .prio-text .desc{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex:none;position:relative;}
+  .radio.on{border-color:var(--primary);}
+  .radio.on::after{content:"";position:absolute;inset:3.5px;border-radius:50%;background:var(--primary);}
+  .capture-actions{display:flex;gap:10px;margin-top:auto;padding:20px 0 26px;}
+  .btn{flex:1;text-align:center;padding:14px;border-radius:16px;font-size:13.5px;font-weight:700;}
+  .btn-ghost{border:1.5px solid var(--border);color:var(--muted);background:#fff;}
+  .btn-primary{background:var(--primary);color:#fff;box-shadow:0 10px 22px rgba(47,128,237,.4);}
+
+  /* ---- Empty state ---- */
+  .empty-wrap{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:0 40px;text-align:center;}
+  .empty-icon{
+    width:76px;height:76px;border-radius:26px;background:var(--bg-alt);
+    display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+  }
+  .empty-icon svg{width:32px;height:32px;stroke:var(--secondary);}
+  .empty-wrap h3{font-size:16.5px;font-weight:800;color:var(--heading);margin:0 0 8px;}
+  .empty-wrap p{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0;}
+</style>
+
+<div class="page">
+  <div class="callout">
+    <b>Warm Confident Rounded</b>
+    Rayons de coin généreux, ombres douces et badges de priorité en icônes plutôt qu'en simples couleurs — un ton
+    chaleureux et sûr de lui, adapté à un outil personnel qui reste agréable à regarder si un client l'aperçoit en
+    séance. L'espacement reste large malgré des formes plus affirmées, conformément au principe "épuré mais cohérent".
+  </div>
+
+  <div class="stage">
+    <div class="col">
+      <div class="frame-label">Vue projet — Tâches</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="app-header">
+          <div class="logo-row">
+            <div class="logo-mark">S</div>
+            <div class="logo-word">STRAT'EDGE</div>
+          </div>
+          <div class="project-row">
+            <div class="project-accent"></div>
+            <div class="project-name">Formation Vente B2B — Session Automne</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active">Tâches</div>
+          <div class="tab">Documents</div>
+          <div class="tab">Notes</div>
+        </div>
+        <div class="filters">
+          <div class="filter on"><div class="chk on"></div>Chronologique</div>
+          <div class="filter"><div class="chk"></div>Prioritaire</div>
+        </div>
+        <div class="list">
+          <div class="task">
+            <div class="task-top">
+              <div class="prio-badge haute"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg></div>
+              <div class="task-main">
+                <div class="task-title-row">
+                  <div class="task-title">Préparer les slides module 3</div>
+                  <div class="pill-new">Nouveau</div>
+                </div>
+                <div class="task-meta">
+                  <span class="meta-chip">12 août</span>
+                  <span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>téléphone</span>
+                </div>
+                <div class="status-pill-row">
+                  <div class="status-pill active">à faire</div>
+                  <div class="status-pill">en cours</div>
+                  <div class="status-pill">terminé</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-top">
+              <div class="prio-badge normale"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg></div>
+              <div class="task-main">
+                <div class="task-title-row">
+                  <div class="task-title">Relancer le client pour la date de session</div>
+                </div>
+                <div class="task-meta">
+                  <span class="meta-chip">8 août</span>
+                  <span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>téléphone</span>
+                </div>
+                <div class="status-pill-row">
+                  <div class="status-pill">à faire</div>
+                  <div class="status-pill active">en cours</div>
+                  <div class="status-pill">terminé</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-top">
+              <div class="prio-badge basse"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+              <div class="task-main">
+                <div class="task-title-row">
+                  <div class="task-title">Réserver la salle de formation</div>
+                  <div class="pill-new">Nouveau</div>
+                </div>
+                <div class="task-meta">
+                  <span class="meta-chip">15 août</span>
+                  <span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>ordinateur</span>
+                </div>
+                <div class="status-pill-row">
+                  <div class="status-pill active">à faire</div>
+                  <div class="status-pill">en cours</div>
+                  <div class="status-pill">terminé</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-top">
+              <div class="prio-badge haute"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg></div>
+              <div class="task-main">
+                <div class="task-title-row">
+                  <div class="task-title">Envoyer le devis mis à jour</div>
+                </div>
+                <div class="task-meta">
+                  <span class="meta-chip overdue">29 juillet · en retard</span>
+                  <span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>ordinateur</span>
+                </div>
+                <div class="status-pill-row">
+                  <div class="status-pill active">à faire</div>
+                  <div class="status-pill">en cours</div>
+                  <div class="status-pill">terminé</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="task-top">
+              <div class="prio-badge basse"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+              <div class="task-main">
+                <div class="task-title-row">
+                  <div class="task-title done">Vérifier le matériel audio</div>
+                </div>
+                <div class="task-meta">
+                  <span class="meta-chip">18 août</span>
+                  <span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>téléphone</span>
+                </div>
+                <div class="status-pill-row">
+                  <div class="status-pill">à faire</div>
+                  <div class="status-pill">en cours</div>
+                  <div class="status-pill active termine">terminé</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="frame-label">Capture — Étape 2/3 · Priorité</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="capture">
+          <div class="back-row">&larr; Retour</div>
+          <div class="steps">
+            <div class="step-circle done">✓</div>
+            <div class="step-line done"></div>
+            <div class="step-circle current">2</div>
+            <div class="step-line"></div>
+            <div class="step-circle">3</div>
+          </div>
+          <div class="project-chip"><div class="dot"></div>Formation Vente B2B — Session Automne</div>
+          <h2>Quelle est la priorité ?</h2>
+          <div class="prio-options">
+            <div class="prio-opt">
+              <div class="prio-icon haute"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg></div>
+              <div class="prio-text"><div class="name">Haute</div><div class="desc">À traiter en priorité</div></div>
+              <div class="radio"></div>
+            </div>
+            <div class="prio-opt selected">
+              <div class="prio-icon normale"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg></div>
+              <div class="prio-text"><div class="name">Normale</div><div class="desc">Rythme habituel</div></div>
+              <div class="radio on"></div>
+            </div>
+            <div class="prio-opt">
+              <div class="prio-icon basse"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+              <div class="prio-text"><div class="name">Basse</div><div class="desc">Peut attendre</div></div>
+              <div class="radio"></div>
+            </div>
+          </div>
+          <div class="capture-actions">
+            <div class="btn btn-ghost">Retour</div>
+            <div class="btn btn-primary">Continuer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="frame-label">Notes — état vide</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="app-header">
+          <div class="logo-row">
+            <div class="logo-mark">S</div>
+            <div class="logo-word">STRAT'EDGE</div>
+          </div>
+          <div class="project-row">
+            <div class="project-accent"></div>
+            <div class="project-name">Formation Vente B2B — Session Automne</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab">Tâches</div>
+          <div class="tab">Documents</div>
+          <div class="tab active">Notes</div>
+        </div>
+        <div class="empty-wrap">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+          </div>
+          <h3>Aucune note pour l'instant</h3>
+          <p>Vos notes sur ce projet apparaîtront ici.<br>Appuyez sur + pour créer la première.</p>
+        </div>
+        <div class="fab">+</div>
+      </div>
+    </div>
+  </div>
+</div>

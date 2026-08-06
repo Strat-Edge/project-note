@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Écran clé — Confirmation suppression document (desktop) — Light</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/*
+  SCREEN 3/3 — Confirmation de suppression de document, variante DESKTOP, thème CLAIR.
+
+  Gouverné par :
+  DESIGN.md →
+    - colors.danger / colors.danger-text — première utilisation réelle de la
+      couleur destructive dans les mocks (réservée à cette confirmation, cf.
+      DESIGN.md "Do's and Don'ts" : jamais utilisée ailleurs)
+    - components.modal — variante desktop : carte centrée, backdrop
+      rgba(15,42,68,.35), radius-desktop (rounded.lg), shadow marquée
+    - components.button-destructive (bg danger, text danger-text, radius md)
+    - components.button-ghost (bordure border, texte muted, radius md)
+    - components.task-card (réutilisé pour la carte document derrière le
+      backdrop — fond/bordure/rayon lg/ombre douce)
+    - typography (heading/body/label/caption), rounded, spacing
+  EXPERIENCE.md →
+    - Component Patterns → "Modale/overlay" (desktop : carte centrée + fond
+      assombri ; fermeture par bouton explicite, jamais de tap-en-dehors
+      silencieux) ; "Actions document" (Télécharger / Supprimer, confirmation
+      avant suppression) ; "Bouton destructif" (toujours dans une modale à
+      deux actions, jamais en action directe)
+    - Voice and Tone → vouvoiement, factuel, phrase courte complète, aucun
+      point d'exclamation/emoji ("Enregistré." registre)
+    - FR-21 (PRD) — la suppression d'un document est définitive
+
+  HEX VALUES USED (vérifiés contre DESIGN.md) :
+    --primary       #2F80ED
+    --secondary     #56A3FF
+    --bg            #F4F7FB
+    --bg-alt        #E9EEF5
+    --border        #D5DCE5
+    --header-bg     #0F2A44
+    --header-text   #FFFFFF
+    --text          #2B2F33
+    --heading       #0F2A44
+    --muted         #7A8594
+    --danger        #D64545
+    --danger-text   #FFFFFF
+    --project-4 (accent projet "Atelier organisation client Dupont Instruments") #E64980
+    modal backdrop  rgba(15,42,68,.35)
+*/
+:root{
+  --primary:#2F80ED;
+  --secondary:#56A3FF;
+  --bg:#F4F7FB;
+  --bg-alt:#E9EEF5;
+  --border:#D5DCE5;
+  --header-bg:#0F2A44;
+  --header-text:#FFFFFF;
+  --text:#2B2F33;
+  --heading:#0F2A44;
+  --muted:#7A8594;
+
+  --danger:#D64545;
+  --danger-text:#FFFFFF;
+
+  --project-4:#E64980;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --rounded-sm:6px;
+  --rounded-md:9px;
+  --rounded-lg:12px;
+  --rounded-xl:16px;
+  --rounded-default:10px;
+  --rounded-full:9999px;
+
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-7:32px; --sp-8:40px;
+  --gutter:20px; --card-gap:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:#DCE3ED;
+  font-family:var(--font);
+  color:var(--text);
+}
+
+.app-shell{
+  max-width:900px;
+  margin:0 auto;
+  background:var(--bg);
+  min-height:760px;
+  box-shadow:0 10px 40px rgba(15,42,68,.18);
+  position:relative;
+  overflow:hidden;
+}
+
+/* ---------- Header (contexte, sous le backdrop) ---------- */
+.app-header{
+  background:var(--header-bg);
+  color:var(--header-text);
+  padding:16px var(--gutter) 16px;
+}
+.logo-row{ display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+.logo-mark{
+  width:22px;height:22px; border-radius:var(--rounded-sm); background:var(--primary);
+  display:flex;align-items:center;justify-content:center; font-size:11px;font-weight:800;color:#fff; flex:none;
+}
+.logo-word{ font-size:11px; letter-spacing:1.4px; text-transform:uppercase; font-weight:700; color:#AFC6E4; }
+.project-row{ display:flex; align-items:center; gap:10px; }
+.project-accent{ width:11px;height:11px; border-radius:var(--rounded-sm); background:var(--project-4); flex:none; }
+.project-name{ font-size:16.5px; font-weight:700; line-height:1.3; color:#fff; }
+
+.tabs-wrap{ padding:var(--sp-3) var(--gutter) 0; background:var(--bg); }
+.tabs{ display:flex; background:var(--bg-alt); border-radius:var(--rounded-xl); padding:var(--sp-1); gap:var(--sp-1); max-width:340px; }
+.tab{ flex:1; text-align:center; padding:9px 0; border-radius:var(--rounded-lg); font-size:12.5px; font-weight:700; letter-spacing:.3px; color:var(--muted); }
+.tab.active{ background:var(--primary); color:#FFFFFF; box-shadow:0 3px 10px rgba(47,128,237,.35); }
+
+/* ---------- Document card (contexte derrière la modale) ---------- */
+.doc-list{ padding:var(--sp-5) var(--gutter) var(--sp-8); }
+.doc-list-title{ font-size:16.5px; font-weight:700; color:var(--heading); margin:0 0 var(--sp-4); }
+.doc-card{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--rounded-lg);
+  padding:var(--sp-3) var(--sp-4);
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
+  display:flex;
+  align-items:center;
+  gap:var(--sp-3);
+  max-width:520px;
+}
+.doc-icon{
+  width:38px;height:38px;
+  border-radius:var(--rounded-md);
+  background:var(--bg-alt);
+  display:flex;align-items:center;justify-content:center;
+  flex:none;
+}
+.doc-icon svg{ width:18px;height:18px; stroke:var(--muted); }
+.doc-info{ flex:1; min-width:0; }
+.doc-info .name{ font-size:13.5px; font-weight:600; color:var(--text); line-height:1.35; display:block; }
+.doc-info .meta{ font-size:10.5px; font-weight:600; color:var(--muted); margin-top:4px; display:block; }
+.doc-actions{ display:flex; gap:var(--sp-2); flex:none; }
+.doc-actions .action{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.2px;
+  color:var(--muted);
+  border:1px solid var(--border);
+  border-radius:var(--rounded-md);
+  padding:6px 10px;
+}
+.doc-actions .action.delete{ color:var(--danger); border-color:var(--danger); }
+
+/* ---------- Modal (desktop) ---------- */
+/* DESIGN.md components.modal — variante desktop : carte centrée + backdrop */
+.modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(15,42,68,.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:var(--gutter);
+}
+.modal-card{
+  width:400px;
+  max-width:100%;
+  background:var(--bg);
+  border-radius:var(--rounded-lg);
+  box-shadow:0 20px 50px rgba(0,0,0,.25);
+  padding:var(--sp-6) var(--sp-6) var(--sp-5);
+}
+.modal-icon{
+  width:44px;height:44px;
+  border-radius:var(--rounded-md);
+  background:rgba(214,69,69,.10);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:var(--sp-4);
+}
+.modal-icon svg{ width:22px;height:22px; stroke:var(--danger); }
+.modal-title{
+  font-size:16.5px;
+  font-weight:700;
+  color:var(--heading);
+  margin:0 0 var(--sp-2);
+  line-height:1.3;
+}
+.modal-body{
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--muted);
+  line-height:1.45;
+  margin:0 0 var(--sp-6);
+}
+.modal-doc-name{
+  color:var(--text);
+  font-weight:700;
+}
+.modal-actions{
+  display:flex;
+  gap:var(--sp-3);
+}
+.btn{
+  flex:1;
+  text-align:center;
+  padding:12px;
+  border-radius:var(--rounded-md);
+  font-size:13px;
+  font-weight:700;
+}
+/* components.button-ghost */
+.btn-ghost{
+  border:1px solid var(--border);
+  color:var(--muted);
+  background:var(--bg);
+}
+/* components.button-destructive — colors.danger, première utilisation réelle */
+.btn-destructive{
+  background:var(--danger);
+  color:var(--danger-text);
+  box-shadow:0 8px 18px rgba(214,69,69,.35);
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="app-header">
+    <div class="logo-row">
+      <div class="logo-mark">S</div>
+      <div class="logo-word">Strat'Edge</div>
+    </div>
+    <div class="project-row">
+      <div class="project-accent"></div>
+      <div class="project-name">Atelier organisation client Dupont Instruments</div>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <div class="tab">Tâches</div>
+      <div class="tab active">Documents</div>
+      <div class="tab">Notes</div>
+    </div>
+  </div>
+
+  <div class="doc-list">
+    <h2 class="doc-list-title">Documents</h2>
+    <div class="doc-card">
+      <div class="doc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      </div>
+      <div class="doc-info">
+        <span class="name">Compte-rendu_atelier_juillet.pdf</span>
+        <span class="meta">PDF · 2,4 Mo · ajouté le 28 juillet</span>
+      </div>
+      <div class="doc-actions">
+        <div class="action">Télécharger</div>
+        <div class="action delete">Supprimer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale de confirmation, déclenchée par l'action "Supprimer" ci-dessus -->
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+      </div>
+      <h3 class="modal-title">Supprimer ce document ?</h3>
+      <p class="modal-body">
+        <span class="modal-doc-name">Compte-rendu_atelier_juillet.pdf</span> sera définitivement supprimé et ne pourra pas être récupéré.
+      </p>
+      <div class="modal-actions">
+        <div class="btn btn-ghost">Annuler</div>
+        <div class="btn btn-destructive">Supprimer</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Écran clé — Vue projet · Tâches — Light</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/*
+  SCREEN 2/3 — "Vue projet", onglet Tâches actif, thème CLAIR.
+
+  Gouverné par :
+  DESIGN.md →
+    - colors (jeu clair : primary/secondary/bg/bg-alt/border/header-bg/text/
+      heading/muted) + colors.priority-haute/normale/basse ET LEURS
+      priority-*-text dédiés (contraste garanti de la lettre H/N/B)
+    - typography (heading/body/label/caption/micro)
+    - rounded (sm/md/lg/xl/DEFAULT)
+    - spacing (base-4, gutter, card-gap)
+    - components.segmented-control (switcher niveau 2 : Tâches/Documents/Notes)
+    - components.checkbox (13px, rayon 4px, bordure muted, fond primary + coche
+      blanche à l'état coché)
+    - components.task-card (fond/bordure/rayon lg/ombre douce)
+    - components.priority-chip (radius sm, 20px, bg+text dédiés par niveau)
+    - components.badge-new (point plein, rayon full, cerclé du fond de carte)
+    - components.meta-pill (fond neutre ; variante "en retard" fond primaire plein)
+    - components.status-row (piste 3 segments, actif primary, "terminé" secondary)
+    - components.fab
+  EXPERIENCE.md →
+    - Component Patterns → Carte de tâche (titre/priorité/provenance/échéance/
+      badge nouveau), Filtres de tri (Chronologique coché par défaut,
+      combinable, case à cocher), Contrôle de statut (tap direct, pas de cycle
+      forcé), Badge "nouveau" (disparaît à la première consultation)
+    - Voice and Tone → vouvoiement, factuel, aucun point d'exclamation/emoji
+
+  HEX VALUES USED (vérifiés contre DESIGN.md) :
+    --primary          #2F80ED
+    --secondary        #56A3FF
+    --bg               #F4F7FB
+    --bg-alt           #E9EEF5
+    --border           #D5DCE5
+    --header-bg        #0F2A44
+    --header-text      #FFFFFF
+    --text             #2B2F33
+    --heading          #0F2A44
+    --muted            #7A8594
+    --priority-haute        #2F80ED   --priority-haute-text    #FFFFFF
+    --priority-normale      #56A3FF   --priority-normale-text  #0F2A44
+    --priority-basse (bg-alt)#E9EEF5  --priority-basse-text    #7A8594
+    --project-1 (accent projet actif) #2F9E44
+*/
+:root{
+  --primary:#2F80ED;
+  --secondary:#56A3FF;
+  --bg:#F4F7FB;
+  --bg-alt:#E9EEF5;
+  --border:#D5DCE5;
+  --header-bg:#0F2A44;
+  --header-text:#FFFFFF;
+  --text:#2B2F33;
+  --heading:#0F2A44;
+  --muted:#7A8594;
+
+  --priority-haute:#2F80ED;          --priority-haute-text:#FFFFFF;
+  --priority-normale:#56A3FF;        --priority-normale-text:#0F2A44;
+  --priority-basse:#E9EEF5;          --priority-basse-text:#7A8594;
+
+  --project-1:#2F9E44;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --rounded-sm:6px;
+  --rounded-md:9px;
+  --rounded-lg:12px;
+  --rounded-xl:16px;
+  --rounded-default:10px;
+  --rounded-full:9999px;
+
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-7:32px; --sp-8:40px;
+  --gutter:20px; --card-gap:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:#DCE3ED;
+  font-family:var(--font);
+  color:var(--text);
+}
+
+.app-shell{
+  max-width:640px;
+  margin:0 auto;
+  background:var(--bg);
+  min-height:900px;
+  box-shadow:0 10px 40px rgba(15,42,68,.18);
+  position:relative;
+}
+
+/* ---------- Header ---------- */
+.app-header{
+  background:var(--header-bg);
+  color:var(--header-text);
+  padding:16px var(--gutter) 16px;
+}
+.logo-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:14px;
+}
+.logo-mark{
+  width:22px;height:22px;
+  border-radius:var(--rounded-sm);
+  background:var(--primary);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:#fff;
+  flex:none;
+}
+.logo-word{
+  font-size:11px;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+  font-weight:700;
+  color:#AFC6E4;
+}
+.project-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.project-accent{
+  width:11px;height:11px;
+  border-radius:var(--rounded-sm);
+  background:var(--project-1);
+  flex:none;
+}
+.project-name{
+  font-size:16.5px;
+  font-weight:700;
+  line-height:1.3;
+  color:#fff;
+}
+
+/* ---------- Segmented control — niveau 2 (Tâches/Documents/Notes) ---------- */
+.tabs-wrap{
+  padding:var(--sp-3) var(--gutter) 0;
+  background:var(--bg);
+}
+.tabs{
+  display:flex;
+  background:var(--bg-alt);
+  border-radius:var(--rounded-xl);
+  padding:var(--sp-1);
+  gap:var(--sp-1);
+}
+.tab{
+  flex:1;
+  text-align:center;
+  padding:9px 0;
+  border-radius:var(--rounded-lg);
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:.3px;
+  color:var(--muted);
+}
+.tab.active{
+  background:var(--primary);
+  color:#FFFFFF;
+  box-shadow:0 3px 10px rgba(47,128,237,.35);
+}
+
+/* ---------- Filtres de tri (cases à cocher) ---------- */
+/* DESIGN.md components.checkbox */
+.filters{
+  display:flex;
+  gap:var(--sp-3);
+  padding:var(--sp-4) var(--gutter) var(--sp-3);
+}
+.filter{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:.3px;
+  color:var(--muted);
+}
+.filter.on{ color:var(--heading); }
+.chk{
+  width:13px;height:13px;
+  border:1.5px solid var(--muted);
+  border-radius:4px;
+  position:relative;
+  flex:none;
+  background:#fff;
+}
+.chk.on{
+  border-color:var(--primary);
+  background:var(--primary);
+}
+.chk.on::after{
+  content:"";
+  position:absolute;left:3px;top:0.5px;
+  width:4px;height:7px;
+  border:solid #fff;
+  border-width:0 1.6px 1.6px 0;
+  transform:rotate(45deg);
+}
+
+/* ---------- Task list ---------- */
+.list{
+  padding:0 var(--gutter) var(--sp-8);
+  display:flex;
+  flex-direction:column;
+  gap:var(--card-gap);
+}
+.task{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--rounded-lg);
+  padding:var(--sp-3) var(--sp-4);
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
+  position:relative;
+}
+.badge-new{
+  position:absolute;top:-5px;right:-5px;
+  width:11px;height:11px;
+  border-radius:var(--rounded-full);
+  background:var(--primary);
+  border:2px solid var(--bg);
+}
+.task-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.task-title{
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--text);
+  line-height:1.35;
+}
+.task-title.done{
+  color:var(--muted);
+  text-decoration:line-through;
+}
+/* Puce de priorité — contraste texte garanti par niveau (priority-*-text) */
+.prio-chip{
+  flex:none;
+  width:20px;height:20px;
+  border-radius:var(--rounded-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9.5px;
+  font-weight:800;
+}
+.prio-chip.haute{ background:var(--priority-haute); color:var(--priority-haute-text); }
+.prio-chip.normale{ background:var(--priority-normale); color:var(--priority-normale-text); }
+.prio-chip.basse{ background:var(--priority-basse); color:var(--priority-basse-text); border:1px solid var(--border); }
+
+.task-meta{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:9px;
+  flex-wrap:wrap;
+}
+.meta-pill{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:10.5px;
+  font-weight:600;
+  color:var(--muted);
+  background:var(--bg-alt);
+  border-radius:var(--rounded-sm);
+  padding:3px 7px;
+}
+.meta-pill svg{ width:11px;height:11px;stroke:var(--muted); }
+.meta-pill.overdue{ color:#fff; background:var(--primary); }
+.meta-pill.overdue svg{ stroke:#fff; }
+
+.status-row{
+  margin-top:10px;
+  display:flex;
+  background:var(--bg-alt);
+  border-radius:var(--rounded-md);
+  padding:2px;
+}
+.status-opt{
+  flex:1;
+  text-align:center;
+  font-size:9.5px;
+  font-weight:700;
+  letter-spacing:.3px;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:6px 0;
+  border-radius:var(--rounded-sm);
+}
+.status-opt.active{ background:var(--primary); color:#fff; }
+.status-opt.active.done-state{ background:var(--secondary); color:var(--priority-normale-text); }
+
+/* ---------- FAB ---------- */
+.fab{
+  position:absolute;
+  right:24px;
+  bottom:24px;
+  width:56px;height:56px;
+  border-radius:var(--rounded-xl);
+  background:var(--primary);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;
+  font-weight:300;
+  box-shadow:0 10px 24px rgba(47,128,237,.45);
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="app-header">
+    <div class="logo-row">
+      <div class="logo-mark">S</div>
+      <div class="logo-word">Strat'Edge</div>
+    </div>
+    <div class="project-row">
+      <div class="project-accent"></div>
+      <div class="project-name">Formation Vente B2B — Session Automne</div>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <div class="tab active">Tâches</div>
+      <div class="tab">Documents</div>
+      <div class="tab">Notes</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter on"><div class="chk on"></div>Chronologique</div>
+    <div class="filter"><div class="chk"></div>Prioritaire</div>
+  </div>
+
+  <div class="list">
+
+    <div class="task">
+      <div class="badge-new"></div>
+      <div class="task-top">
+        <div class="task-title">Préparer les slides du module 3</div>
+        <div class="prio-chip haute">H</div>
+      </div>
+      <div class="task-meta">
+        <span class="meta-pill">12 août</span>
+        <span class="meta-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+          téléphone
+        </span>
+      </div>
+      <div class="status-row">
+        <div class="status-opt active">à faire</div>
+        <div class="status-opt">en cours</div>
+        <div class="status-opt">terminé</div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-top">
+        <div class="task-title">Relancer le client pour la date de session</div>
+        <div class="prio-chip normale">N</div>
+      </div>
+      <div class="task-meta">
+        <span class="meta-pill">8 août</span>
+        <span class="meta-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>
+          ordinateur
+        </span>
+      </div>
+      <div class="status-row">
+        <div class="status-opt">à faire</div>
+        <div class="status-opt active">en cours</div>
+        <div class="status-opt">terminé</div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="badge-new"></div>
+      <div class="task-top">
+        <div class="task-title">Réserver la salle de formation</div>
+        <div class="prio-chip basse">B</div>
+      </div>
+      <div class="task-meta">
+        <span class="meta-pill">15 août</span>
+        <span class="meta-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>
+          ordinateur
+        </span>
+      </div>
+      <div class="status-row">
+        <div class="status-opt active">à faire</div>
+        <div class="status-opt">en cours</div>
+        <div class="status-opt">terminé</div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-top">
+        <div class="task-title">Envoyer le devis mis à jour</div>
+        <div class="prio-chip haute">H</div>
+      </div>
+      <div class="task-meta">
+        <span class="meta-pill overdue">29 juillet · en retard</span>
+        <span class="meta-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>
+          ordinateur
+        </span>
+      </div>
+      <div class="status-row">
+        <div class="status-opt active">à faire</div>
+        <div class="status-opt">en cours</div>
+        <div class="status-opt">terminé</div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-top">
+        <div class="task-title done">Vérifier le matériel audio</div>
+        <div class="prio-chip basse">B</div>
+      </div>
+      <div class="task-meta">
+        <span class="meta-pill">18 août</span>
+        <span class="meta-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+          téléphone
+        </span>
+      </div>
+      <div class="status-row">
+        <div class="status-opt">à faire</div>
+        <div class="status-opt">en cours</div>
+        <div class="status-opt active done-state">terminé</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fab">+</div>
+
+</div>
+
+</body>
+</html>

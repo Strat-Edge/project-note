@@ -1,0 +1,377 @@
+<!--
+  DIRECTION 1 — "Minimal Editorial" (light mode)
+
+  Rationale: A quiet, restrained register built on hairline dividers, a serif
+  display face for headings, and text-first priority/status cues instead of
+  colour badges — it reads like a well-typeset document, not a dashboard.
+  This suits Guillaume's daily-driver internal tool (low visual noise across
+  ~10 projects) while doubling as a credibility showcase: when a client sees
+  it over his shoulder, it looks like considered, professional software
+  rather than an off-the-shelf template. Light mode only in this file.
+-->
+<style>
+  /*
+    HEX VALUES USED IN THIS DIRECTION (all locked brand tokens, no invented hues):
+    --primary   #2F80ED  (active tab underline, links, primary button, Haute stripe)
+    --secondary #56A3FF  (project accent bar, Normale stripe, hover states)
+    --bg        #F4F7FB  (page / device background)
+    --bg-alt    #E9EEF5  (subtle zebra / chip background)
+    --border    #D5DCE5  (hairline dividers, Basse stripe, input borders)
+    --header-bg #0F2A44  (header background, headings)
+    --header-tx #FFFFFF  (header text)
+    --text      #2B2F33  (body text)
+    --muted     #7A8594  (secondary / meta text)
+    --heading   #0F2A44  (headings)
+    No new colours were introduced. The brief suggested a "red dot" for the
+    unread marker; since red is not in the palette, this direction instead
+    uses a small italic "Nouveau" caption set in --primary — text-based, on
+    brand, and consistent with the editorial voice.
+  */
+  :root{
+    --primary:#2F80ED;
+    --secondary:#56A3FF;
+    --bg:#F4F7FB;
+    --bg-alt:#E9EEF5;
+    --border:#D5DCE5;
+    --header-bg:#0F2A44;
+    --header-tx:#FFFFFF;
+    --text:#2B2F33;
+    --muted:#7A8594;
+    --heading:#0F2A44;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-head: Georgia, "Times New Roman", Cambria, serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#EAEDF1;font-family:var(--font-body);color:var(--text);}
+  .page{padding:40px 32px 80px;}
+  .callout{
+    max-width:900px;margin:0 auto 40px;background:#fff;border:1px solid var(--border);
+    border-left:4px solid var(--primary);padding:18px 22px;border-radius:4px;
+    font-size:13.5px;line-height:1.55;color:var(--text);
+  }
+  .callout b{color:var(--heading);font-family:var(--font-head);font-size:15px;display:block;margin-bottom:4px;}
+  .stage{display:flex;gap:36px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .col{display:flex;flex-direction:column;align-items:center;}
+  .frame-label{font-family:var(--font-head);font-style:italic;color:var(--muted);font-size:13px;margin-bottom:10px;}
+
+  .device{
+    width:375px;height:812px;background:var(--bg);border-radius:6px;
+    border:1px solid var(--border);overflow:hidden;position:relative;
+    display:flex;flex-direction:column;
+  }
+  .statusbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:8px 20px 4px;font-size:12px;color:var(--header-tx);background:var(--header-bg);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---- Header ---- */
+  .app-header{background:var(--header-bg);color:var(--header-tx);padding:14px 20px 18px;}
+  .logo-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .logo-mark{
+    width:20px;height:20px;border:1.5px solid var(--secondary);border-radius:2px;
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-head);
+    font-size:12px;color:var(--secondary);
+  }
+  .logo-word{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#C9D8EA;}
+  .project-row{display:flex;align-items:baseline;gap:10px;}
+  .project-accent{width:3px;height:20px;background:var(--secondary);flex:none;}
+  .project-name{font-family:var(--font-head);font-size:19px;line-height:1.25;color:#fff;}
+
+  /* ---- Segmented control (editorial underline tabs) ---- */
+  .tabs{display:flex;gap:24px;padding:0 20px;background:var(--bg);border-bottom:1px solid var(--border);}
+  .tab{
+    padding:13px 0 11px;font-size:13.5px;color:var(--muted);cursor:default;
+    border-bottom:2px solid transparent;font-family:var(--font-body);
+  }
+  .tab.active{color:var(--heading);font-weight:600;border-bottom-color:var(--primary);}
+
+  /* ---- Filters ---- */
+  .filters{display:flex;gap:22px;padding:14px 20px;background:var(--bg);}
+  .filter{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text);}
+  .chk{
+    width:14px;height:14px;border:1.4px solid var(--muted);border-radius:2px;position:relative;flex:none;
+  }
+  .chk.on{border-color:var(--primary);background:var(--primary);}
+  .chk.on::after{
+    content:"";position:absolute;left:3px;top:0.5px;width:4px;height:8px;
+    border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg);
+  }
+
+  /* ---- Task list ---- */
+  .list{flex:1;overflow-y:auto;background:var(--bg);}
+  .task{
+    display:flex;gap:12px;padding:15px 20px 15px 16px;border-bottom:1px solid var(--border);
+    position:relative;
+  }
+  .stripe{width:3px;border-radius:2px;flex:none;align-self:stretch;}
+  .stripe.haute{background:var(--primary);}
+  .stripe.normale{background:var(--secondary);}
+  .stripe.basse{background:var(--border);}
+  .task-body{flex:1;min-width:0;}
+  .task-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .task-title{font-size:14.5px;color:var(--text);line-height:1.35;}
+  .task-title.done{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--border);}
+  .nouveau{font-family:var(--font-head);font-style:italic;color:var(--primary);font-size:11px;white-space:nowrap;margin-left:6px;}
+  .task-meta{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:11.5px;color:var(--muted);}
+  .meta-item{display:flex;align-items:center;gap:4px;}
+  .meta-item svg{width:12px;height:12px;stroke:var(--muted);}
+  .prio-label{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+  .overdue{color:var(--heading);font-weight:700;}
+  .overdue-tag{
+    font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--heading);
+    border:1px solid var(--heading);border-radius:2px;padding:1px 5px;margin-left:6px;
+  }
+  .status{margin-top:9px;}
+  .status-label{
+    font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;padding:2px 0;
+    border-bottom:1.5px solid var(--border);display:inline-block;color:var(--muted);
+  }
+  .status-label.encours{color:var(--primary);border-bottom-color:var(--primary);}
+  .status-label.termine{color:var(--muted);border-bottom-color:var(--muted);}
+  .status-label.afaire{color:var(--heading);border-bottom-color:var(--heading);}
+
+  .fab{
+    position:absolute;right:20px;bottom:22px;width:52px;height:52px;border-radius:50%;
+    background:var(--bg);border:1.5px solid var(--primary);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;font-size:24px;font-family:var(--font-head);
+  }
+
+  /* ---- Secondary: capture step 2/3 ---- */
+  .capture{padding:22px 22px 0;background:var(--bg);flex:1;}
+  .back-row{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px;margin-bottom:18px;}
+  .steps{display:flex;align-items:center;gap:6px;margin-bottom:22px;}
+  .step{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .step-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+  .step.done .step-dot{background:var(--secondary);}
+  .step.current{color:var(--heading);font-weight:700;}
+  .step.current .step-dot{background:var(--primary);}
+  .step-line{width:20px;height:1px;background:var(--border);}
+  .project-chip{
+    display:flex;align-items:center;gap:8px;background:var(--bg-alt);border:1px solid var(--border);
+    border-radius:4px;padding:9px 12px;margin-bottom:26px;font-size:12.5px;color:var(--text);
+  }
+  .project-chip .dot{width:8px;height:8px;background:var(--secondary);border-radius:2px;}
+  .capture h2{font-family:var(--font-head);font-weight:normal;font-size:21px;color:var(--heading);margin:0 0 22px;}
+  .prio-options{display:flex;flex-direction:column;gap:10px;}
+  .prio-opt{
+    display:flex;align-items:center;gap:14px;padding:16px 16px;border:1px solid var(--border);
+    border-radius:4px;background:#fff;
+  }
+  .prio-opt.selected{border-color:var(--primary);background:var(--bg-alt);}
+  .prio-swatch{width:4px;align-self:stretch;border-radius:2px;}
+  .prio-opt.haute .prio-swatch{background:var(--primary);}
+  .prio-opt.normale .prio-swatch{background:var(--secondary);}
+  .prio-opt.basse .prio-swatch{background:var(--border);}
+  .prio-text{flex:1;}
+  .prio-text .name{font-family:var(--font-head);font-size:15.5px;color:var(--heading);}
+  .prio-text .desc{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .radio{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);flex:none;position:relative;}
+  .radio.on{border-color:var(--primary);}
+  .radio.on::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--primary);}
+  .capture-actions{display:flex;gap:10px;margin-top:auto;padding:20px 0 24px;}
+  .btn{
+    flex:1;text-align:center;padding:13px;border-radius:4px;font-size:13.5px;font-family:var(--font-body);
+  }
+  .btn-ghost{border:1px solid var(--border);color:var(--muted);}
+  .btn-primary{background:var(--primary);color:#fff;font-weight:600;}
+
+  /* ---- Empty state ---- */
+  .empty-wrap{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:0 40px;text-align:center;}
+  .empty-wrap svg{width:46px;height:46px;stroke:var(--border);margin-bottom:18px;}
+  .empty-wrap h3{font-family:var(--font-head);font-weight:normal;font-size:17px;color:var(--heading);margin:0 0 8px;}
+  .empty-wrap p{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0;}
+</style>
+
+<div class="page">
+  <div class="callout">
+    <b>Minimal Editorial</b>
+    Registre calme et retenu&nbsp;: titres en serif, séparateurs filaires, aucune ombre. Les priorités et le statut nouveau
+    passent par le texte et de fines barres plutôt que par des badges colorés — pensé pour rester lisible à travers dix
+    projets sans fatigue visuelle, tout en donnant une impression de logiciel soigné face à un client.
+  </div>
+
+  <div class="stage">
+    <div class="col">
+      <div class="frame-label">Vue projet — Tâches</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="app-header">
+          <div class="logo-row">
+            <div class="logo-mark">S</div>
+            <div class="logo-word">Strat'Edge</div>
+          </div>
+          <div class="project-row">
+            <div class="project-accent"></div>
+            <div class="project-name">Formation Vente B2B — Session Automne</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active">Tâches</div>
+          <div class="tab">Documents</div>
+          <div class="tab">Notes</div>
+        </div>
+        <div class="filters">
+          <div class="filter"><div class="chk on"></div>Chronologique</div>
+          <div class="filter"><div class="chk"></div>Prioritaire</div>
+        </div>
+        <div class="list">
+          <div class="task">
+            <div class="stripe haute"></div>
+            <div class="task-body">
+              <div class="task-top">
+                <div class="task-title">Préparer les slides module 3<span class="nouveau">nouveau</span></div>
+              </div>
+              <div class="task-meta">
+                <span class="meta-item">12 août</span>
+                <span class="prio-label">Priorité haute</span>
+                <span class="meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+                  téléphone
+                </span>
+              </div>
+              <div class="status"><span class="status-label afaire">à faire</span></div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="stripe normale"></div>
+            <div class="task-body">
+              <div class="task-top">
+                <div class="task-title">Relancer le client pour la date de session</div>
+              </div>
+              <div class="task-meta">
+                <span class="meta-item">8 août</span>
+                <span class="prio-label">Priorité normale</span>
+                <span class="meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+                  téléphone
+                </span>
+              </div>
+              <div class="status"><span class="status-label encours">en cours</span></div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="stripe basse"></div>
+            <div class="task-body">
+              <div class="task-top">
+                <div class="task-title">Réserver la salle de formation<span class="nouveau">nouveau</span></div>
+              </div>
+              <div class="task-meta">
+                <span class="meta-item">15 août</span>
+                <span class="prio-label">Priorité basse</span>
+                <span class="meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>
+                  ordinateur
+                </span>
+              </div>
+              <div class="status"><span class="status-label afaire">à faire</span></div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="stripe haute"></div>
+            <div class="task-body">
+              <div class="task-top">
+                <div class="task-title">Envoyer le devis mis à jour</div>
+              </div>
+              <div class="task-meta">
+                <span class="meta-item overdue">29 juillet<span class="overdue-tag">en retard</span></span>
+                <span class="prio-label">Priorité haute</span>
+                <span class="meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/></svg>
+                  ordinateur
+                </span>
+              </div>
+              <div class="status"><span class="status-label afaire">à faire</span></div>
+            </div>
+          </div>
+          <div class="task">
+            <div class="stripe basse"></div>
+            <div class="task-body">
+              <div class="task-top">
+                <div class="task-title done">Vérifier le matériel audio</div>
+              </div>
+              <div class="task-meta">
+                <span class="meta-item">18 août</span>
+                <span class="prio-label">Priorité basse</span>
+                <span class="meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+                  téléphone
+                </span>
+              </div>
+              <div class="status"><span class="status-label termine">terminé</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="frame-label">Capture — Étape 2/3 · Priorité</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="capture" style="display:flex;flex-direction:column;">
+          <div class="back-row">&larr; Retour</div>
+          <div class="steps">
+            <div class="step done"><div class="step-dot"></div>Projet</div>
+            <div class="step-line"></div>
+            <div class="step current"><div class="step-dot"></div>Priorité</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="step-dot"></div>Type</div>
+          </div>
+          <div class="project-chip"><div class="dot"></div>Formation Vente B2B — Session Automne</div>
+          <h2>Quelle est la priorité ?</h2>
+          <div class="prio-options">
+            <div class="prio-opt haute">
+              <div class="prio-swatch"></div>
+              <div class="prio-text"><div class="name">Haute</div><div class="desc">À traiter en priorité</div></div>
+              <div class="radio"></div>
+            </div>
+            <div class="prio-opt normale selected">
+              <div class="prio-swatch"></div>
+              <div class="prio-text"><div class="name">Normale</div><div class="desc">Rythme habituel</div></div>
+              <div class="radio on"></div>
+            </div>
+            <div class="prio-opt basse">
+              <div class="prio-swatch"></div>
+              <div class="prio-text"><div class="name">Basse</div><div class="desc">Peut attendre</div></div>
+              <div class="radio"></div>
+            </div>
+          </div>
+          <div class="capture-actions">
+            <div class="btn btn-ghost">Retour</div>
+            <div class="btn btn-primary">Continuer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="frame-label">Notes — état vide</div>
+      <div class="device">
+        <div class="statusbar"><span>9:41</span><span>●●●  Wi-Fi  100%</span></div>
+        <div class="app-header">
+          <div class="logo-row">
+            <div class="logo-mark">S</div>
+            <div class="logo-word">Strat'Edge</div>
+          </div>
+          <div class="project-row">
+            <div class="project-accent"></div>
+            <div class="project-name">Formation Vente B2B — Session Automne</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab">Tâches</div>
+          <div class="tab">Documents</div>
+          <div class="tab active">Notes</div>
+        </div>
+        <div class="empty-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.3"><rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+          <h3>Aucune note pour l'instant</h3>
+          <p>Les notes prises sur ce projet apparaîtront ici.<br>Utilisez le bouton + pour en ajouter une.</p>
+        </div>
+        <div class="fab">+</div>
+      </div>
+    </div>
+  </div>
+</div>
