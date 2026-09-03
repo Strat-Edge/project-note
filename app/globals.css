@@ -1,12 +1,125 @@
+/* ============================================================
+   Design tokens — Strat'Edge (cf. DESIGN.md)
+   Palette brute : un token par clé DESIGN.md.colors. Le mapping
+   clair → sombre est spécifique à chaque composant (ex. DESIGN.md :
+   segmented-control.track-bg-dark = surface-dark, mais
+   priority-chip.basse-bg-dark = surface-2-dark) — chaque composant
+   futur choisit sa paire lui-même à partir des tokens bruts ci-dessous.
+   Les alias réactifs (--color-bg/--color-surface/--color-text/
+   --color-border/--color-muted/--color-heading) ne couvrent que le
+   chrome de page déjà nécessaire à cette story (header, formulaire,
+   placeholder) et sont redéfinis sous prefers-color-scheme: dark.
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Marque et priorité — identiques dans les deux thèmes (cf. DESIGN.md Colors) */
+  --color-primary: #2f80ed;
+  --color-secondary: #56a3ff;
+  --color-header-bg: #0f2a44;
+  --color-header-text: #ffffff;
+  --color-link-hover: #1c5dc9;
+  --color-danger: #d64545;
+  --color-danger-text: #ffffff;
+  /* Texte sur bouton primaire (DESIGN.md components.button-primary.text) */
+  --color-on-primary: #ffffff;
+  /* Texte de priorité recolorié sur demande de Guillaume (retour manuel post-Epic 6) :
+     basse=vert, normale=jaune, haute=rouge — remplace l'ancien dégradé de bleus, jugé peu
+     lisible ("on est resté dans le bleu"). "Normale" est passée d'orange à jaune (retour
+     manuel suivant : "entre orange et rouge, ça ne fait pas grande différence") — un jaune
+     assez soutenu (#b8860b, "darkgoldenrod") pour rester lisible sur fond clair ET sombre,
+     un jaune franc façon #ffc107 perdait tout contraste sur le fond neutre clair
+     (--color-bg-alt). Basse/haute réutilisent les teintes déjà présentes dans la palette
+     (project-1 vert, danger rouge). Les fonds des puces/options associées passent en neutre
+     (--color-bg-alt / --color-surface-2-dark, cf. project-view.module.css/capture-
+     flow.module.css/general-screen.module.css) : un texte coloré sur un fond bleu de
+     luminosité proche restait illisible. */
+  --color-priority-haute-text: #d64545;
+  --color-priority-normale-text: #b8860b;
+  --color-priority-basse-text: #2f9e44;
+  /* Texte du segment "terminé" du statut de tâche (project-view.module.css .statusOption)
+     — anciennement recyclait --color-priority-normale-text (même valeur #0f2a44 à
+     l'époque) car il tombait juste sur le bon contraste par coïncidence. Détaché en token
+     dédié : le recyclage aurait fait hériter ce segment de la recoloration priorité
+     ci-dessus, sans rapport avec lui. */
+  --color-status-done-text: #0f2a44;
+  --color-project-1: #2f9e44;
+  --color-project-2: #e8590c;
+  --color-project-3: #9c36b5;
+  --color-project-4: #e64980;
+  --color-project-5: #f08c00;
+  --color-project-6: #0ca678;
+  --color-project-7: #c2255c;
+  --color-project-8: #495057;
+
+  /* Palette brute clair/sombre — non réactive, cf. commentaire ci-dessus */
+  --color-bg-alt: #e9eef5;
+  --color-bg-dark: #0a1b2e;
+  --color-surface-dark: #13293f;
+  --color-surface-2-dark: #1b3350;
+  --color-border-dark: #2b4560;
+  --color-text-dark: #e7ecf3;
+  --color-muted-dark: #93a4b8;
+
+  /* Alias réactifs — chrome de page (redéfinis en sombre ci-dessous) */
+  --color-bg: #f4f7fb;
+  --color-surface: #f4f7fb;
+  --color-border: #d5dce5;
+  --color-text: #2b2f33;
+  --color-heading: #0f2a44;
+  --color-muted: #7a8594;
+
+  /* Typographie — police système uniquement (UX-DR2, aucune police custom chargée) */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-display-size: 19px;
+  --font-display-weight: 800;
+  --font-display-line-height: 1.25;
+  --font-heading-size: 16.5px;
+  --font-heading-weight: 700;
+  --font-heading-line-height: 1.3;
+  --font-body-size: 13.5px;
+  --font-body-weight: 600;
+  --font-body-line-height: 1.35;
+  --font-label-size: 12.5px;
+  --font-label-weight: 700;
+  --font-label-letter-spacing: 0.3px;
+  --font-caption-size: 10.5px;
+  --font-caption-weight: 600;
+  --font-micro-size: 9.5px;
+  --font-micro-weight: 800;
+  --font-micro-letter-spacing: 0.4px;
+
+  /* Rayons (DESIGN.md.rounded) */
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  --radius-default: 10px;
+
+  /* Espacement — base 4px (DESIGN.md.spacing) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-gutter: 20px;
+  --space-card-gap: 10px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Jamais une inversion automatique — dérivations à la main de DESIGN.md */
+    --color-bg: var(--color-bg-dark);
+    --color-surface: var(--color-surface-dark);
+    --color-border: var(--color-border-dark);
+    --color-text: var(--color-text-dark);
+    --color-muted: var(--color-muted-dark);
+    /* Pas de heading-dark explicite dans DESIGN.md — réutilise text-dark pour
+       rester lisible sur fond marine (seul --text-dark y est défini). */
+    --color-heading: var(--color-text-dark);
   }
 }
 
@@ -24,9 +137,9 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -45,5 +158,14 @@ a {
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
   }
 }

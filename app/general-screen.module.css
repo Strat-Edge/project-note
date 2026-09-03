@@ -1,0 +1,598 @@
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-5);
+  padding: var(--space-6);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.title {
+  font-size: var(--font-heading-size);
+  font-weight: var(--font-heading-weight);
+  line-height: var(--font-heading-line-height);
+  color: var(--color-heading);
+}
+
+.subtitle {
+  margin-top: 4px;
+  font-size: var(--font-caption-size);
+  font-weight: var(--font-caption-weight);
+  color: var(--color-muted);
+}
+
+.toolbarControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Segmented control Mois/Semaine — mêmes valeurs de token que components/switcher.module.css
+   (DESIGN.md.components.segmented-control), dupliquées littéralement (convention établie,
+   cf. project-view.module.css .tablist). */
+.viewToggle {
+  display: flex;
+  padding: var(--space-1);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-alt);
+}
+
+@media (prefers-color-scheme: dark) {
+  .viewToggle {
+    background: var(--color-surface-dark);
+  }
+}
+
+.viewToggleItem {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-muted);
+  font-size: var(--font-label-size);
+  font-weight: var(--font-label-weight);
+  letter-spacing: var(--font-label-letter-spacing);
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  .viewToggleItem {
+    color: var(--color-muted-dark);
+  }
+}
+
+.viewToggleItem[data-active="true"] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.navArrow {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.periodLabel {
+  min-width: 140px;
+  text-align: center;
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  color: var(--color-heading);
+  letter-spacing: 0.3px;
+}
+
+/* FR-28, FR-31 (Story 4.2) — filtre multi-projet + case "Afficher les projets archivés".
+   Case à cocher dupliquée littéralement de project-view.module.css (.filter/
+   .checkboxInput/.checkboxBox, DESIGN.md.components.checkbox) — même convention déjà
+   établie ci-dessus pour .viewToggle (dupliqué de switcher.module.css). */
+.projectFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  color: var(--color-muted);
+  font-size: var(--font-label-size);
+  font-weight: var(--font-label-weight);
+  letter-spacing: var(--font-label-letter-spacing);
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  .filter {
+    color: var(--color-muted-dark);
+  }
+}
+
+.checkboxInput {
+  composes: visuallyHidden;
+}
+
+.checkboxBox {
+  flex-shrink: 0;
+  position: relative;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--color-muted);
+  border-radius: 4px;
+  background: var(--color-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .checkboxBox {
+    border-color: var(--color-muted-dark);
+  }
+}
+
+.checkboxInput:checked + .checkboxBox {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.checkboxInput:checked + .checkboxBox::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0.5px;
+  width: 4px;
+  height: 7px;
+  border: solid var(--color-on-primary);
+  border-width: 0 1.6px 1.6px 0;
+  transform: rotate(45deg);
+}
+
+.checkboxInput:focus-visible + .checkboxBox {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Pastille de couleur projet dans le libellé du filtre — même swatch que .dayPanelCellProject
+   i (ci-dessous), taille réduite pour tenir dans une case à cocher. */
+.filterSwatch {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+/* Wrapper de ligne (en-tête ou semaine de cellules) — display:contents (revue de code) : ne
+   génère aucune boîte propre, ses enfants restent des items directs de .grid (mise en page
+   CSS Grid à 7 colonnes inchangée) tout en existant dans l'arbre d'accessibilité pour porter
+   role="row" (conformité WAI-ARIA Grid — les gridcell doivent être enfermées dans un row). */
+.week {
+  display: contents;
+}
+
+.weekdayHeader {
+  text-align: center;
+  font-size: var(--font-micro-size);
+  font-weight: var(--font-micro-weight);
+  letter-spacing: var(--font-micro-letter-spacing);
+  color: var(--color-muted);
+  text-transform: uppercase;
+}
+
+@media (prefers-color-scheme: dark) {
+  .weekdayHeader {
+    color: var(--color-muted-dark);
+  }
+}
+
+.cell {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  min-height: 82px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Bouton pleine cellule (retour Guillaume : les dates ne réagissaient à aucun clic) — le
+   padding vit ici plutôt que sur .cell (ci-dessus) pour que la cible tactile couvre toute la
+   cellule, pas seulement son contenu visuel. */
+.cellButton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cell[data-selected="true"] {
+  border-color: var(--color-primary);
+  border-width: 2px;
+  background: var(--color-bg-alt);
+}
+
+@media (prefers-color-scheme: dark) {
+  .cell[data-selected="true"] {
+    background: var(--color-surface-2-dark);
+  }
+}
+
+/* Vue semaine : une seule rangée, plus de place par jour (cf. Dev Notes — aucun mockup
+   dédié, grille dérivée de la vue mois). */
+.grid[data-mode="week"] .cell {
+  min-height: 140px;
+}
+
+.cell[data-muted="true"] {
+  background: var(--color-bg-alt);
+}
+
+@media (prefers-color-scheme: dark) {
+  .cell[data-muted="true"] {
+    background: var(--color-surface-2-dark);
+  }
+}
+
+.cell[data-today="true"] {
+  border: 1.5px solid var(--color-primary);
+}
+
+.dayNum {
+  font-size: var(--font-label-size);
+  font-weight: var(--font-label-weight);
+  color: var(--color-text);
+}
+
+.cell[data-muted="true"] .dayNum {
+  color: var(--color-muted);
+}
+
+.cell[data-today="true"] .dayNum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: var(--font-caption-size);
+}
+
+/* Puce de priorité (calendrier) — DESIGN.md.components.meta-pill note + Component Patterns
+   "Même code visuel que la puce de priorité des cartes ; n'affecte jamais la position de la
+   tâche dans la grille." Deux marqueurs par tâche, pas un seul (cf. Dev Notes) : le point
+   coloré par PROJET (FR-29) et la puce H/N/B colorée par PRIORITÉ (FR-32) sont deux
+   exigences indépendantes de la story, chacune avec sa propre encodage couleur — aucune
+   des deux ne peut se substituer à l'autre sans en perdre le sens. */
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: auto;
+}
+
+.dotGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.projectDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  display: block;
+  flex-shrink: 0;
+}
+
+.priorityDot {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 11px;
+  height: 11px;
+  border-radius: 4px;
+  font-size: 6.5px;
+  font-weight: var(--font-micro-weight);
+}
+
+/* Fond neutre + bordure pour les 3 niveaux (même traitement que project-view.module.css
+   .priorityChip — texte seul distingue la priorité, cf. globals.css) : la bordure reste
+   nécessaire pour les 3 (pas seulement "basse" comme avant la recoloration), sans elle le
+   fond de la puce (--color-bg-alt) est identique à celui de .cell[data-muted="true"] sur un
+   jour hors mois, rendant la puce invisible (cf. Dev Notes Story 4.1). */
+.priorityDot[data-priority="high"],
+.priorityDot[data-priority="normal"],
+.priorityDot[data-priority="low"] {
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-muted);
+}
+
+.priorityDot[data-priority="high"] {
+  color: var(--color-priority-haute-text);
+}
+
+.priorityDot[data-priority="normal"] {
+  color: var(--color-priority-normale-text);
+}
+
+.priorityDot[data-priority="low"] {
+  color: var(--color-priority-basse-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  .priorityDot[data-priority="high"],
+  .priorityDot[data-priority="normal"],
+  .priorityDot[data-priority="low"] {
+    background: var(--color-surface-2-dark);
+    border-color: var(--color-muted-dark);
+  }
+}
+
+/* Panneau du jour sélectionné (retour Guillaume : "on clique sur un jour et sa liste en bas
+   les tâches et les projets") — bloc pleine largeur sous la grille. L'ancienne légende
+   "Projets" (bloc similaire, liste des couleurs de projet visibles sur toute la période) a
+   été retirée : ce panneau affiche déjà le nom et la couleur du projet sur chaque ligne,
+   la légende séparée faisait doublon (retour Guillaume : "n'a pas lieu d'être"). */
+.dayPanel {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dayPanel {
+    border-color: var(--color-border-dark);
+  }
+}
+
+/* Même style que .title (h1 "Calendrier général" ci-dessus) — retour Guillaume, 4e
+   reformulation : "la date tu appliques le même style que le titre 'Calendrier général'".
+   --color-heading est déjà réactif au thème (redéfini sous prefers-color-scheme: dark dans
+   globals.css), aucune règle dark séparée n'est donc nécessaire ici. */
+.dayPanelTitle {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-heading-size);
+  font-weight: var(--font-heading-weight);
+  line-height: var(--font-heading-line-height);
+  color: var(--color-heading);
+}
+
+/* Tableau à 4 colonnes alignées, TOUTES de même largeur (retour Guillaume : "quand je dis
+   colonnes réparties je veux dire de même taille") — un seul CSS grid partagé par l'en-tête
+   ET toutes les lignes : chaque wrapper de ligne (.dayPanelRow, y compris l'en-tête) est
+   display:contents, ses cellules deviennent donc des items directs de CE grid, garantissant
+   un alignement vertical strict colonne par colonne (même mécanisme que .week/
+   display:contents dans la grille du calendrier ci-dessus). minmax(0, 1fr) (pas `auto`) sur
+   les 4 — un essai précédent avec `auto` sur Créé le/Délai les faisait grandir pour absorber
+   l'espace libre en l'absence de piste flexible (comportement `auto` du spec CSS Grid, pas un
+   bug : sans piste `fr`, l'espace libre se répartit quand même sur les pistes `auto`), les
+   écartant l'une de l'autre au lieu de les garder groupées ("les colonnes ne collent pas",
+   plusieurs retours manuels successifs). Le `0` dans minmax(0, 1fr) est nécessaire pour que
+   l'ellipse du titre de tâche (.dayPanelItemTitle) fonctionne à largeur égale plutôt que de
+   forcer sa colonne à s'élargir au-delà de sa part. */
+.dayPanelTable {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--space-3);
+}
+
+.dayPanelRow {
+  display: contents;
+}
+
+/* Même style que .dayPanelItemTitle, même rationale que .dayPanelTitle ci-dessus. */
+.dayPanelHeaderCell {
+  padding: 0 0 var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dayPanelHeaderCell {
+    border-color: var(--color-border-dark);
+  }
+}
+
+.dayPanelCellProject,
+.dayPanelCellTask,
+.dayPanelCellCreated,
+.dayPanelCellDelay {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dayPanelCellProject,
+  .dayPanelCellTask,
+  .dayPanelCellCreated,
+  .dayPanelCellDelay {
+    border-color: var(--color-border-dark);
+  }
+}
+
+/* font-label-size (pas font-caption-size) — retour Guillaume : "les lignes en dessous des
+   titres de colonne écris un peu plus grand". Même bump appliqué à .dayPanelCellProject/
+   .dayPanelItemTitle/.dayPanelCellDelay ci-dessous, pour rester cohérent entre les 4
+   colonnes. */
+.dayPanelCellCreated {
+  color: var(--color-muted);
+  font-size: var(--font-label-size);
+  font-weight: var(--font-caption-weight);
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dayPanelCellCreated {
+    color: var(--color-muted-dark);
+  }
+}
+
+a.dayPanelRow {
+  cursor: pointer;
+}
+
+.dayPanelCellProject {
+  gap: 7px;
+  overflow: hidden;
+  font-size: var(--font-label-size);
+  font-weight: var(--font-caption-weight);
+  color: var(--color-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dayPanelCellProject {
+    color: var(--color-muted-dark);
+  }
+}
+
+.dayPanelCellProject i {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.dayPanelCellTask {
+  gap: var(--space-2);
+}
+
+/* Même code visuel que .priorityChip (project-view.module.css) — puce H/N/B, fond neutre,
+   texte coloré par priorité (cf. globals.css). */
+.dayPanelPriority {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-alt);
+  font-size: var(--font-micro-size);
+  font-weight: var(--font-micro-weight);
+  letter-spacing: var(--font-micro-letter-spacing);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dayPanelPriority {
+    background: var(--color-surface-2-dark);
+  }
+}
+
+.dayPanelPriority[data-priority="high"] {
+  color: var(--color-priority-haute-text);
+}
+
+.dayPanelPriority[data-priority="normal"] {
+  color: var(--color-priority-normale-text);
+}
+
+.dayPanelPriority[data-priority="low"] {
+  color: var(--color-priority-basse-text);
+}
+
+/* Ellipse — le titre est le seul élément de la ligne qui peut être long, il absorbe seul le
+   manque de place plutôt que de renvoyer les autres colonnes à la ligne. Même style discret
+   que les 3 autres cellules (.dayPanelCellProject/Created/Delay) — retour Guillaume : "le
+   texte de la tâche avec le même style que les autres textes de la ligne" ; le blanc/gras
+   d'origine est passé sur la date et les en-têtes de colonnes (cf. .dayPanelTitle/
+   .dayPanelHeaderCell ci-dessus). */
+.dayPanelItemTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--font-label-size);
+  font-weight: var(--font-caption-weight);
+  color: var(--color-muted);
+}
+
+/* Délai — texte rouge (--color-danger) uniquement si en retard (retour Guillaume : "délai
+   (texte en rouge si dépassé)"), pas de fond plein cette fois (contrairement à .metaPill
+   data-overdue de project-view.module.css) : un simple texte coloré suffit dans une colonne
+   de tableau dédiée, un badge plein aurait fait doublon avec la bordure de cellule. Aligné à
+   gauche comme les 3 autres colonnes (pas flex-end) — retour Guillaume : "le texte du délai
+   sur la gauche, pas collé à droite". */
+.dayPanelCellDelay {
+  color: var(--color-muted);
+  font-size: var(--font-label-size);
+  font-weight: var(--font-caption-weight);
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dayPanelCellDelay {
+    color: var(--color-muted-dark);
+  }
+}
+
+.dayPanelCellDelay[data-overdue="true"] {
+  color: var(--color-danger);
+  font-weight: var(--font-body-weight);
+}
+
+.error {
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  color: var(--color-danger);
+}

@@ -23,8 +23,8 @@ Voir `_bmad-output/planning-artifacts/architecture/architecture-Project Note-202
 
 ## Stack
 
-Next.js 16.3.0 (App Router) · TypeScript 7.0.2 · Dexie.js (IndexedDB, local-first) · Supabase (Postgres + Auth + Storage) · Serwist (PWA/service worker) · Web Push (VAPID).
+Next.js 16.3.0 (App Router) · TypeScript 6.0.3 (déviation flaguée du pin AD-8 à 7.0.2 — incompatibilité `typescript-eslint`, cf. Story 1.1 Dev Agent Record) · Dexie.js (IndexedDB, local-first) · Supabase (Postgres + Auth + Storage) · Serwist (PWA/service worker) · Web Push (VAPID).
 
 ## Déploiement
 
-Render (Web Service) — build `npm run build`, start `next start`. Pas d'environnement de staging (décision explicite, outil interne solo).
+Render (Web Service) — Build command : `npm install && npm run build` (Render n'enchaîne pas `npm install` automatiquement avant un Build Command custom), Start command : `npm run start`. Pas d'environnement de staging (décision explicite, outil interne solo).

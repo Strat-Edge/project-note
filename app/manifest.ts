@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 
-// Placeholder d'identité — remplacé par le logo et les couleurs Strat'Edge réels en Story 1.3.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Project Note",
@@ -12,9 +11,22 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#0F2A44",
     icons: [
       {
-        src: "/icon-placeholder.svg",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-512-maskable.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };

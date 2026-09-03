@@ -4,7 +4,7 @@ baseline_commit: NO_VCS
 
 # Story 1.1: Initialisation et déploiement du projet
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -54,6 +54,19 @@ so that je dispose d'une base fonctionnelle sur laquelle construire toutes les f
   - [x] Build command : `npm install && npm run build` (Render n'enchaîne pas `npm install` automatiquement avant un Build Command custom — premier déploiement a échoué avec `next: not found` jusqu'à correction, cf. Dev Agent Record) — Start command : `npm run start`
   - [x] Variables d'environnement renseignées sur Render : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` (les clés `OPENAI_API_KEY`/`VAPID_*` seront ajoutées par les stories qui en ont besoin — Epic 5 et Epic 7 — pas ici)
   - [x] Vérifié : `https://project-note-1ble.onrender.com/` (HTTP 200), `/manifest.webmanifest` (HTTP 200), `/sw.js` (HTTP 200)
+
+### Review Findings
+
+- [x] [Review][Patch] Incohérence version TypeScript entre README.md (7.0.2) et package.json (6.0.3) [README.md:26] — corrigé, README reflète maintenant la déviation flaguée AD-8
+- [x] [Review][Patch] README documentait `npm run build` seul comme build command Render, alors que le Debug Log indique que ça échoue sans `npm install` préalable [README.md:30] — corrigé
+- [x] [Review][Patch] `navigator.storage.persist()` sans gestion de rejet de promesse [app/storage-init.tsx:11] — ajout de `.catch(() => {})`
+- [x] [Review][Patch] `requireEnv` acceptait une valeur composée uniquement d'espaces comme valide [data/remote/client.ts:9] — ajout de `.trim()`
+- [x] [Review][Patch] Aucun contrôle d'indexation pour un outil public sans authentification (Story 1.2 pas encore livrée) — ajout de `app/robots.ts` (disallow global)
+- [x] [Review][Defer] `data/local/db.ts` n'est importé nulle part encore ; risque latent si un futur composant serveur importe `data/local` avant qu'un vrai usage client existe [data/local/db.ts] — deferred, pre-existing (pattern de stub vide intentionnel, cf. Dev Notes)
+- [x] [Review][Defer] Icônes manifest/apple-touch-icon insuffisantes pour l'installabilité PWA complète (une seule icône SVG `sizes: any`, pas de variante maskable ni PNG 192/512, pas d'apple-touch-icon) [app/manifest.ts, app/layout.tsx] — deferred, pre-existing (placeholder explicitement en attente du vrai logo Story 1.3)
+- [x] [Review][Defer] Commentaire de `data/remote/client.ts` sur la garde `server-only` : le mécanisme ne bloque que l'inclusion dans le bundle client, pas un import direct par un React Server Component — nuance à corriger dans le commentaire quand un premier Server Action/route handler consommera réellement ce module [data/remote/client.ts:4-6] — deferred, pre-existing
+- [x] [Review][Defer] Aucune règle ESLint n'impose automatiquement les frontières de dépendance AD-2 (domain/, components/, sync/) — repose entièrement sur la discipline humaine — deferred, pre-existing
+- [x] [Review][Defer] Pas de `engines.node`/`.node-version` pour figer la version Node utilisée par Render [package.json] — deferred, pre-existing
 
 ## Dev Notes
 
@@ -160,3 +173,4 @@ Claude Sonnet 5 (claude-sonnet-5)
 ## Change Log
 
 - 2026-08-06 : Implémentation initiale (Tasks 1, 3, 4 complets en autonomie ; Tasks 2 et 5 finalisées en binôme avec Guillaume pour les étapes cloud — création du projet Supabase, des buckets, du service Render). Toutes les tâches complètes, tous les AC vérifiés en production. Statut passé à `review`.
+- 2026-08-06 : Revue de code (Blind Hunter + Edge Case Hunter + Acceptance Auditor). 5 patches appliqués (incohérences README/package.json, promesse non gérée, validation env var, ajout robots.ts), 5 items reportés (pré-existants, non bloquants — voir deferred-work.md). Build re-vérifié après patchs. Statut passé à `done`.

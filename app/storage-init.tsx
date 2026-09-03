@@ -8,7 +8,7 @@ import { useEffect } from "react";
 export function StorageInit() {
   useEffect(() => {
     if (typeof navigator !== "undefined" && navigator.storage?.persist) {
-      navigator.storage.persist();
+      navigator.storage.persist().catch(() => {});
     }
   }, []);
 

@@ -1,17 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Header } from "@/components/header";
+import { Switcher } from "@/components/switcher";
+import { CaptureFlow } from "./capture-flow";
+import { iosSplashStartupImages } from "@/components/ios-splash-startup-images";
 import { StorageInit } from "./storage-init";
+import { SyncEngine } from "./sync-engine";
+import { SyncIndicator } from "./sync-indicator";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Project Note",
@@ -21,6 +16,7 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "Project Note",
+    startupImage: iosSplashStartupImages,
   },
 };
 
@@ -30,10 +26,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="fr">
       <body>
         <StorageInit />
+        <Header />
+        <SyncEngine />
+        <SyncIndicator />
+        <Switcher />
         {children}
+        <CaptureFlow />
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 # generated: 2026-08-05
-# last_updated: 2026-08-06
+# last_updated: 2026-09-03 (story 6.3 done — Task 8 exécutée et AC#1 vérifié par Guillaume en conditions réelles ; amendement aperçu inline image/PDF ajouté à sa demande ; revue de code adversariale complète, 8 patches appliqués (dont un fond plein --color-danger utilisé à tort sur les déclencheurs Supprimer, corrigé conforme au mockup) + 8 findings deferred consignés ; build/lint/tsc propres ; reste AC#2/#3 et vérification cross-appareil en conditions réelles à la charge de Guillaume si non déjà faites)
 # project: Project Note
 # project_key: NOKEY
 # tracking_system: file-system
@@ -41,7 +41,7 @@
 # - Retrospective appends its action items to action_items; sprint-status surfaces open ones
 
 generated: 2026-08-05
-last_updated: 2026-08-06
+last_updated: 2026-09-03 (story 6.2 done — code complet, revue de code adversariale complète (3 patches appliqués, 2 defer consignés), affinage UI (badge "nouveau" agrandi sur demande de Guillaume), vérification manuelle en conditions réelles complétée par Guillaume (AC#1 OK, aucune régression). story 6.1 done — code complet, vérification manuelle par Guillaume (AC#1-4 OK), amendement sélection multi-fichiers + affinage UI, revue de code adversariale (18 findings, 5 patch corrigés, 4 defer consignés) ; reste nettoyage données de test hors périmètre revue. story 5.2 done — revue de code adversariale complète (14 patch appliqués, 7 defer consignés), build/lint/tsc propres ; reste hors périmètre revue : test micro sur appareil réel une fois en prod + nettoyage données de test Supabase. story 5.3 done — code complet, migration SQL exécutée, vérification manuelle largement faite en conditions réelles par Guillaume (1 bug trouvé et corrigé), revue de code adversariale complète (9 findings corrigés) ; Guillaume clôt et reprend le suivi ailleurs — reste non vérifié, bloqué par un incident Supabase externe (PGRST303, JWT rejeté par PostgREST, cf. status.supabase.com, sans rapport avec le code) : scénario de conflit à deux profils, indicateur de synchro, nettoyage données de test Supabase)
 project: Project Note
 project_key: NOKEY
 tracking_system: file-system
@@ -49,42 +49,42 @@ story_location: _bmad-output/implementation-artifacts
 
 development_status:
   epic-1: in-progress
-  1-1-initialisation-et-deploiement-du-projet: review
-  1-2-connexion-par-email-et-mot-de-passe: backlog
-  1-3-application-de-lidentite-visuelle-stratedge: backlog
+  1-1-initialisation-et-deploiement-du-projet: done
+  1-2-connexion-par-email-et-mot-de-passe: done
+  1-3-application-de-lidentite-visuelle-stratedge: done
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-creation-dun-projet: backlog
-  2-2-liste-et-navigation-des-projets: backlog
-  2-3-archivage-et-desarchivage-dun-projet: backlog
+  epic-2: in-progress
+  2-1-creation-dun-projet: done
+  2-2-liste-et-navigation-des-projets: done
+  2-3-archivage-et-desarchivage-dun-projet: done
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-capture-dune-tache-via-le-flux: backlog
-  3-2-ecriture-hors-ligne-et-synchronisation-automatique: backlog
-  3-3-vue-projet-onglets-et-indicateurs: backlog
-  3-4-tri-combinable-dans-la-vue-projet: backlog
-  3-5-suivi-du-statut-et-modification-de-la-priorite-dune-tache: backlog
-  3-6-resolution-de-conflit-de-synchronisation-par-champ: backlog
+  epic-3: in-progress
+  3-1-capture-dune-tache-via-le-flux: done
+  3-2-ecriture-hors-ligne-et-synchronisation-automatique: done
+  3-3-vue-projet-onglets-et-indicateurs: done
+  3-4-tri-combinable-dans-la-vue-projet: done
+  3-5-suivi-du-statut-et-modification-de-la-priorite-dune-tache: done
+  3-6-resolution-de-conflit-de-synchronisation-par-champ: done
   epic-3-retrospective: optional
 
-  epic-4: backlog
-  4-1-vue-calendrier-mois-semaine: backlog
-  4-2-filtre-par-projet-et-gestion-des-projets-archives: backlog
-  4-3-acces-rapide-a-un-projet-depuis-le-calendrier: backlog
+  epic-4: in-progress
+  4-1-vue-calendrier-mois-semaine: done
+  4-2-filtre-par-projet-et-gestion-des-projets-archives: done
+  4-3-acces-rapide-a-un-projet-depuis-le-calendrier: done
   epic-4-retrospective: optional
 
-  epic-5: backlog
-  5-1-creation-dune-note-texte: backlog
-  5-2-enregistrement-dune-note-vocale: backlog
-  5-3-transcription-a-la-demande: backlog
+  epic-5: in-progress
+  5-1-creation-dune-note-texte: done
+  5-2-enregistrement-dune-note-vocale: done
+  5-3-transcription-a-la-demande: done
   epic-5-retrospective: optional
 
-  epic-6: backlog
-  6-1-ajout-dun-document: backlog
-  6-2-liste-et-consultation-des-documents-dun-projet: backlog
-  6-3-telechargement-et-suppression-dun-document: backlog
+  epic-6: done
+  6-1-ajout-dun-document: done
+  6-2-liste-et-consultation-des-documents-dun-projet: done
+  6-3-telechargement-et-suppression-dun-document: done
   epic-6-retrospective: optional
 
   epic-7: backlog

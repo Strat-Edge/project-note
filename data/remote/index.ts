@@ -13,3 +13,20 @@
 // Cf. ARCHITECTURE-SPINE.md — AD-2, AD-4, AD-6.
 
 export { createSupabaseClient, createSupabaseServiceClient } from "./client";
+export {
+  upsertProjectFields,
+  upsertTaskFields,
+  upsertNoteFields,
+  upsertDocumentFields,
+  fetchAllProjectsTasksNotesAndDocuments,
+  getDocumentStoragePath,
+  deleteDocumentRow,
+} from "./sync";
+export { uploadNoteAudio, createNoteAudioSignedUrl } from "./storage";
+export { transcribeAudio } from "./transcription";
+export {
+  uploadDocumentFile,
+  createDocumentSignedUrl,
+  createDocumentPreviewUrl,
+  removeDocumentFile,
+} from "./document-storage";

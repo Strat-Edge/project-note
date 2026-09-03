@@ -1,0 +1,734 @@
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-5);
+  padding: var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.projectSwatch {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+}
+
+.title {
+  font-size: var(--font-heading-size);
+  font-weight: var(--font-heading-weight);
+  line-height: var(--font-heading-line-height);
+  color: var(--color-heading);
+}
+
+.statusPill {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-alt);
+  color: var(--color-muted);
+  font-size: var(--font-caption-size);
+  font-weight: var(--font-caption-weight);
+}
+
+@media (prefers-color-scheme: dark) {
+  .statusPill {
+    background: var(--color-surface-2-dark);
+    color: var(--color-muted-dark);
+  }
+}
+
+/* Fiche projet unifiée (retour Guillaume, remplace l'ancien sélecteur d'onglets Tâches/
+   Documents/Notes) : Tâches en haut à gauche, Notes en haut à droite, Documents pleine
+   largeur en dessous, en une seule colonne empilée sous 768px (pas la place pour 2 colonnes
+   sur mobile). Les 3 modules restent visibles simultanément, chacun scrollable en interne
+   (.sectionScroll) plutôt que de se substituer l'un à l'autre au clic. */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "tasks" "notes" "documents";
+  gap: var(--space-5);
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .contentGrid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "tasks notes" "documents documents";
+  }
+}
+
+/* Encadré visuel par module (retour Guillaume : "il faudrait faire des encadrés qu'on
+   distingue bien les trois parties" — les 3 sections n'étaient pas assez différenciées les
+   unes des autres, ni du fond de page). */
+.moduleSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+@media (prefers-color-scheme: dark) {
+  .moduleSection {
+    background: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+  }
+}
+
+.tasksSection {
+  grid-area: tasks;
+}
+
+.notesSection {
+  grid-area: notes;
+}
+
+.documentsSection {
+  grid-area: documents;
+}
+
+.sectionTitle {
+  font-size: var(--font-label-size);
+  font-weight: var(--font-label-weight);
+  letter-spacing: var(--font-label-letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  .sectionTitle {
+    color: var(--color-muted-dark);
+  }
+}
+
+/* Défilement interne par module ("il faut des [scrollbars] pour pouvoir circuler dedans",
+   retour Guillaume) — plafonné en vh plutôt qu'un calc() dépendant de la hauteur exacte du
+   chrome (header/switcher), plus robuste si l'un de ces éléments change de hauteur. Tâches/
+   Notes reçoivent le double de hauteur des Documents ("deux tiers un tiers... que les
+   documents ne prennent qu'un tiers de la page en bas", retour Guillaume). Le padding
+   top/right donne la marge nécessaire au badge "nouveau" (.newBadgeDot, décalé de -6px hors
+   de sa carte) pour ne pas se faire rogner par overflow-y: auto — sans lui le badge dépassait
+   du cadre (retour Guillaume : "les petits ronds bleus... dépassent complètement du cadre"). */
+.sectionScroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow-y: auto;
+  max-height: 52vh;
+  padding: var(--space-2);
+}
+
+.documentsSection .sectionScroll {
+  max-height: 26vh;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Filtres de tri combinables — DESIGN.md.components.checkbox. */
+.filters {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  color: var(--color-muted);
+  font-size: var(--font-label-size);
+  font-weight: var(--font-label-weight);
+  letter-spacing: var(--font-label-letter-spacing);
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  .filter {
+    color: var(--color-muted-dark);
+  }
+}
+
+.checkboxInput {
+  composes: visuallyHidden;
+}
+
+.checkboxBox {
+  flex-shrink: 0;
+  position: relative;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--color-muted);
+  border-radius: 4px;
+  background: var(--color-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .checkboxBox {
+    border-color: var(--color-muted-dark);
+  }
+}
+
+.checkboxInput:checked + .checkboxBox {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.checkboxInput:checked + .checkboxBox::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0.5px;
+  width: 4px;
+  height: 7px;
+  border: solid var(--color-on-primary);
+  border-width: 0 1.6px 1.6px 0;
+  transform: rotate(45deg);
+}
+
+.checkboxInput:focus-visible + .checkboxBox {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.empty,
+.error {
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+}
+
+.empty {
+  color: var(--color-muted);
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+/* Liste de cartes — DESIGN.md.spacing.card-gap, jamais compressée (Do's and Don'ts). */
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-card-gap);
+  width: 100%;
+  list-style: none;
+}
+
+/* Carte de tâche — DESIGN.md.components.task-card. */
+.taskCard {
+  position: relative;
+}
+
+.taskCardButton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  .taskCardButton {
+    background: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+}
+
+.taskCardRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.taskTitle {
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  color: var(--color-text);
+}
+
+.taskTitle[data-done="true"] {
+  color: var(--color-muted);
+  text-decoration: line-through;
+}
+
+@media (prefers-color-scheme: dark) {
+  .taskTitle[data-done="true"] {
+    color: var(--color-muted-dark);
+  }
+}
+
+/* Nom de fichier en position "titre" de la carte document (Story 6.2) — même style de
+   base que .taskTitle, sans variante data-done (Document n'a pas de statut). */
+.documentFileName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  color: var(--color-text);
+}
+
+/* Contenu de note tronqué sur 2 lignes dans la carte — pas de champ titre séparé
+   (domain/note.ts), le texte libre en tient lieu visuellement (Do's and Don'ts DESIGN.md :
+   préférer le défilement à la compression, mais une carte de liste reste compacte, le texte
+   complet est toujours consultable dans NoteDetail). */
+.noteContent {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  color: var(--color-text);
+}
+
+/* Lecteur audio d'une note vocale (Story 5.2, FR-16) — NoteDetail uniquement. */
+.audioPreview {
+  width: 100%;
+}
+
+/* Badge "nouveau" — DESIGN.md.components.badge-new. L'anneau reprend le fond de PAGE et
+   non le fond réel de la carte en sombre — ne pas "corriger", cf. Dev Notes de la story.
+   Taille du point agrandie à 16px (spec DESIGN.md : 11px) sur demande explicite de
+   Guillaume (retour manuel Story 6.2 : trop discret) — décalage top/right ajusté en
+   conséquence pour garder le même débord visuel proportionnel sur le coin de la carte. */
+.newBadgeDot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  border: 2px solid var(--color-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .newBadgeDot {
+    border-color: var(--color-bg-dark);
+  }
+}
+
+/* Puce de priorité — DESIGN.md.components.priority-chip (lettre H/N/B). */
+.priorityChip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-micro-size);
+  font-weight: var(--font-micro-weight);
+  letter-spacing: var(--font-micro-letter-spacing);
+}
+
+/* Fond neutre identique pour les 3 niveaux (revu — Guillaume, retour manuel) : seul le
+   texte distingue désormais la priorité (vert/orange/rouge, cf. globals.css), un fond bleu
+   uniforme sur "haute"/"normale" rendait ce texte coloré illisible (luminosités trop
+   proches). */
+.priorityChip[data-priority="high"],
+.priorityChip[data-priority="normal"],
+.priorityChip[data-priority="low"] {
+  background: var(--color-bg-alt);
+}
+
+.priorityChip[data-priority="high"] {
+  color: var(--color-priority-haute-text);
+}
+
+.priorityChip[data-priority="normal"] {
+  color: var(--color-priority-normale-text);
+}
+
+.priorityChip[data-priority="low"] {
+  color: var(--color-priority-basse-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  .priorityChip[data-priority="high"],
+  .priorityChip[data-priority="normal"],
+  .priorityChip[data-priority="low"] {
+    background: var(--color-surface-2-dark);
+  }
+}
+
+/* Puce de métadonnée — DESIGN.md.components.meta-pill. */
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.metaPill {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-alt);
+  color: var(--color-muted);
+  font-size: var(--font-caption-size);
+  font-weight: var(--font-caption-weight);
+}
+
+@media (prefers-color-scheme: dark) {
+  .metaPill {
+    background: var(--color-surface-2-dark);
+    color: var(--color-muted-dark);
+  }
+}
+
+.metaPill[data-overdue="true"],
+.metaPill[data-conflict="true"] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* Contrôle de statut — DESIGN.md.components.status-row (piste à 3 segments, mockup
+   key-project-view.html .status-row/.status-opt). */
+.statusRow {
+  display: flex;
+  margin-top: var(--space-2);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .statusRow {
+    background: var(--color-surface-2-dark);
+  }
+}
+
+/* min-height: 44px déroge à la hauteur visuelle fine du mockup (Accessibility Floor,
+   cibles tactiles ≥44px y compris les segments de statut) — même dérogation documentée
+   que .filter/.checkboxBox en Story 3.4. */
+.statusOption {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-muted);
+  font-size: var(--font-micro-size);
+  font-weight: var(--font-micro-weight);
+  letter-spacing: var(--font-micro-letter-spacing);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  .statusOption {
+    color: var(--color-muted-dark);
+  }
+}
+
+.statusOption[data-active="true"] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.statusOption[data-active="true"][data-status="done"] {
+  background: var(--color-secondary);
+  color: var(--color-status-done-text);
+}
+
+/* Modale de détail — même pattern responsive que components/confirm-dialog.module.css /
+   app/capture-flow.module.css (mobile plein écran sans backdrop ni rayon, desktop carte
+   centrée). Pas de classe partagée cross-module (convention établie en Story 2.3). */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  background: transparent;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  min-height: 100%;
+  padding: var(--space-6) var(--space-gutter);
+  overflow-y: auto;
+  background: var(--color-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .panel {
+    background: var(--color-surface-dark);
+  }
+}
+
+@media (min-width: 768px) {
+  .backdrop {
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 42, 68, 0.35);
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 480px;
+    min-height: 0;
+    max-height: 85vh;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  }
+}
+
+@media (min-width: 768px) and (prefers-color-scheme: dark) {
+  .panel {
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  }
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Bandeau de résolution de conflit — Story 3.6. Bordure --color-primary (seule couleur
+   d'accent disponible hors palette de priorité/danger, cf. Dev Notes de la story) pour
+   signaler visuellement l'état sans texte supplémentaire. */
+.conflictBanner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-default);
+  background: var(--color-bg-alt);
+}
+
+@media (prefers-color-scheme: dark) {
+  .conflictBanner {
+    background: var(--color-surface-2-dark);
+  }
+}
+
+.conflictBannerLabel {
+  font-size: var(--font-label-size);
+  font-weight: var(--font-label-weight);
+  letter-spacing: var(--font-label-letter-spacing);
+  color: var(--color-heading);
+}
+
+@media (prefers-color-scheme: dark) {
+  .conflictBannerLabel {
+    color: var(--color-text-dark);
+  }
+}
+
+/* Reprend littéralement .priorityOption (même cible tactile 48px), sans les variantes
+   data-priority/data-selected — un bouton de conflit n'a pas d'état "sélectionné" persistant,
+   le choix ferme immédiatement le bandeau en effaçant le conflit. */
+.conflictOption {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Sélecteur de priorité du détail — mêmes valeurs que .optionList/.option de
+   app/capture-flow.module.css, dupliquées ici (CSS Modules, pas de partage natif entre
+   fichiers ; même convention de duplication assumée que le reste de ce fichier). */
+.prioritySelector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.priorityOption {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  text-align: left;
+  cursor: pointer;
+}
+
+.priorityOption[data-selected="true"] {
+  border-color: var(--color-primary);
+}
+
+/* Même traitement neutre que .priorityChip ci-dessus. */
+.priorityOption[data-priority="low"],
+.priorityOption[data-priority="normal"],
+.priorityOption[data-priority="high"] {
+  background: var(--color-bg-alt);
+}
+
+.priorityOption[data-priority="low"] {
+  color: var(--color-priority-basse-text);
+}
+
+.priorityOption[data-priority="normal"] {
+  color: var(--color-priority-normale-text);
+}
+
+.priorityOption[data-priority="high"] {
+  color: var(--color-priority-haute-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  .priorityOption[data-priority="low"],
+  .priorityOption[data-priority="normal"],
+  .priorityOption[data-priority="high"] {
+    background: var(--color-surface-2-dark);
+  }
+}
+
+.detailDescription {
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  color: var(--color-text);
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.ghostButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-muted);
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ghostButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Déclencheur Supprimer sur la carte/le détail (DESIGN.md.colors.danger + mockup
+   key-delete-confirmation.html `.doc-actions .action.delete`) — contour/texte danger,
+   PAS le fond plein. Le fond plein (`--color-danger` en background) reste réservé
+   exclusivement au bouton de confirmation de la modale (components/confirm-dialog.module.css
+   .destructiveButton) : DESIGN.md ("réservé à la confirmation de suppression, jamais
+   ailleurs") et le mockup source distinguent explicitement les deux traitements — revue de
+   code, Story 6.3 (le fond plein avait été appliqué par erreur ici à l'implémentation). */
+.destructiveGhostButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-danger);
+  font-size: var(--font-body-size);
+  font-weight: var(--font-body-weight);
+  cursor: pointer;
+}
+
+.destructiveGhostButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Actions Télécharger/Supprimer de DocumentCard — sibling du bouton d'ouverture de la
+   carte (EXPERIENCE.md "Actions document"). Répartition 50/50 via > *, pas de classe
+   dédiée par bouton. */
+.documentActions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.documentActions > * {
+  flex: 1;
+}
+
+/* Aperçu inline d'un document (DocumentDetail) — plafonné en hauteur pour ne pas dominer la
+   modale (Guillaume, retour manuel post-Story 6.3 : "aperçu miniaturisé, pour ne pas prendre
+   trop de place"). object-fit: contain préserve le ratio d'une image sans la rogner. */
+.documentPreviewImage {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: var(--radius-default);
+  background: var(--color-bg-alt);
+}
+
+@media (prefers-color-scheme: dark) {
+  .documentPreviewImage {
+    background: var(--color-surface-2-dark);
+  }
+}
+
+.documentPreviewFrame {
+  display: block;
+  width: 100%;
+  height: 300px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-default);
+}
+
+@media (prefers-color-scheme: dark) {
+  .documentPreviewFrame {
+    border-color: var(--color-border-dark);
+  }
+}

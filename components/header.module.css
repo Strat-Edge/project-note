@@ -1,0 +1,15 @@
+.header {
+  display: flex;
+  align-items: center;
+  min-height: 72px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+  flex-shrink: 0;
+}
+
+.logo {
+  display: block;
+  height: 48px;
+  width: auto;
+}
