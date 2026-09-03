@@ -16,7 +16,13 @@ export function Header() {
         height={294}
         priority
       />
-      <span className={styles.logoText}>Strat&apos;Edge</span>
+      <span className={styles.logoText}>
+        Strat&apos;Edge
+        {/* Masqué sur mobile (cf. .logoSlogan, header.module.css) — pas la place à côté du "+"
+            en haut à droite (position: fixed, hors du flux du header) sans chevauchement sur
+            un petit écran. */}
+        <span className={styles.logoSlogan}> - Former pour performer</span>
+      </span>
     </header>
   );
 }

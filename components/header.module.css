@@ -14,15 +14,19 @@
   display: flex;
   align-items: center;
   min-height: 72px;
-  padding: var(--space-3) var(--space-4);
+  /* Padding vertical retiré (retour Guillaume : "le logo plus grand à la limite du bord du
+     header") — seul le padding horizontal subsiste, .logo prend toute la hauteur de la barre
+     (72px, ci-dessous) au lieu d'être contraint par un padding vertical. */
+  padding: 0 var(--space-4);
   background: var(--color-header-bg);
   color: var(--color-header-text);
   flex-shrink: 0;
 }
 
+/* height: 72px (= min-height du header) — flush haut/bas, cf. commentaire ci-dessus. */
 .logo {
   display: block;
-  height: 48px;
+  height: 72px;
   width: auto;
 }
 
@@ -37,4 +41,21 @@
   font-weight: 700;
   color: var(--color-header-text);
   white-space: nowrap;
+}
+
+/* Slogan à la suite du nom (retour Guillaume : "ajouter '- Former pour performer' à la suite
+   de Strat'Edge, en plus petit mais même police") — hérite font-family de .logoText (Times
+   New Roman), pas de redéclaration. Poids normal (pas 700) : distingue visuellement le
+   slogan du nom de marque sans changer de couleur. Masqué sous 768px — pas la place à côté du
+   "+" (position: fixed, hors du flux de ce header) sur un écran étroit. */
+.logoSlogan {
+  display: none;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+@media (min-width: 768px) {
+  .logoSlogan {
+    display: inline;
+  }
 }

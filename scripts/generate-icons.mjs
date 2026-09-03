@@ -1,13 +1,17 @@
-// Génère les icônes PWA/favicon/splash de l'app depuis les assets de charte Strat'Edge.
+// Génère les icônes PWA/favicon de l'app depuis l'asset de charte Strat'Edge.
 //
-// Deux sources :
-// - SYMBOL_SOURCE (Strat'Edge.png, 291×294, cheval seul) — favicon, apple-icon, icônes manifest.
-//   Le SVG du même symbole (logo-seul.svg, aujourd'hui remplacé) contenait 12 images raster
-//   embarquées sous filtres/masques et n'était pas exploitable tel quel (cf. Dev Notes Story 1.3).
-// - HORIZONTAL_SOURCE (Strat'Edge_h_b_slogan.png, 457×294, cheval + wordmark + slogan, texte blanc
-//   pensé pour un fond sombre) — logo du header (public/brand/) et source du splash iOS.
+// SYMBOL_SOURCE (logo-icon.png, 291×294, cheval seul) — favicon, apple-icon, icônes manifest.
+// Le SVG du même symbole (logo-seul.svg, aujourd'hui remplacé) contenait 12 images raster
+// embarquées sous filtres/masques et n'était pas exploitable tel quel (cf. Dev Notes Story 1.3).
+// Renommé depuis Strat'Edge.png (retour manuel Guillaume, en-tête recolorié) — même fichier
+// que public/brand/logo-icon.png, utilisé directement par components/header.tsx.
 //
-// Regénérer avec ce script si l'un des fichiers de Strat'Edge/Branding/Logos/ change.
+// L'ancien HORIZONTAL_SOURCE (cheval + wordmark + slogan incrustés dans l'image, généré vers
+// public/brand/logo-horizontal.png) est retiré : le Header compose désormais l'icône et le nom
+// "Strat'Edge" séparément (vrai texte HTML, cf. components/header.tsx/.module.css) — il n'y a
+// plus besoin d'un lockup horizontal pré-rendu.
+//
+// Regénérer avec ce script si Strat'Edge/Branding/Logos/logo-icon.png change.
 // Usage : node scripts/generate-icons.mjs
 
 import { mkdir } from "node:fs/promises";
@@ -15,8 +19,7 @@ import path from "node:path";
 import sharp from "sharp";
 import pngToIco from "png-to-ico";
 
-const SYMBOL_SOURCE = "Strat'Edge/Branding/Logos/Strat’Edge.png";
-const HORIZONTAL_SOURCE = "Strat'Edge/Branding/Logos/Strat’Edge_h_b_slogan.png";
+const SYMBOL_SOURCE = "Strat'Edge/Branding/Logos/logo-icon.png";
 // colors.header-bg — fond plein pour la zone de sécurité maskable. DOIT rester synchronisé
 // avec --color-header-bg dans app/globals.css (pas de lien automatique, script Node autonome
 // sans accès aux custom properties CSS) — si la couleur de marque change, mettre à jour les
@@ -81,10 +84,10 @@ async function main() {
   await writeResized("public/icons/icon-512.png", 512);
   await writeMaskable("public/icons/icon-512-maskable.png", 512);
 
-  // Logo horizontal (cheval + wordmark + slogan, texte blanc) — source du Header, copie directe.
-  await ensureDir("public/brand/logo-horizontal.png");
-  await sharp(HORIZONTAL_SOURCE).png().toFile("public/brand/logo-horizontal.png");
-  console.log("✓ public/brand/logo-horizontal.png (source Header)");
+  // Copie directe vers public/brand/ — source du Header (components/header.tsx).
+  await ensureDir("public/brand/logo-icon.png");
+  await sharp(SYMBOL_SOURCE).png().toFile("public/brand/logo-icon.png");
+  console.log("✓ public/brand/logo-icon.png (source Header)");
 }
 
 main().catch((err) => {
