@@ -9,13 +9,13 @@ import { SyncIndicator } from "./sync-indicator";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Project Note",
+  title: "Strat'Edge",
   description: "Application de gestion de projets personnelle — Strat'Edge",
-  applicationName: "Project Note",
+  applicationName: "Strat'Edge",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Project Note",
+    title: "Strat'Edge",
     startupImage: iosSplashStartupImages,
   },
 };

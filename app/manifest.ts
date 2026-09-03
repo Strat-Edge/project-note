@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Project Note",
-    short_name: "Project Note",
+    name: "Strat'Edge",
+    short_name: "Strat'Edge",
     description: "Application de gestion de projets personnelle — Strat'Edge",
     start_url: "/",
     display: "standalone",
