@@ -1,4 +1,16 @@
+/* position: sticky (retour Guillaume : "le logo et le plus [restent] fixes quand on
+   scrolle") — le FAB (app/capture-flow.module.css .fab, position: fixed) reste toujours
+   visible en haut à droite pendant le défilement, mais jusqu'ici cette barre défilait avec le
+   reste de la page : passé le premier écran, le "+" se retrouvait seul, sans le bandeau
+   derrière lui ("ce n'est pas l'idéal, c'est moins propre"). z-index inférieur à celui du FAB
+   (90, cf. capture-flow.module.css) : le "+" doit toujours rester peint par-dessus ce bandeau,
+   jamais l'inverse, alors même que capture-flow.tsx le monte APRÈS ce composant dans
+   app/layout.tsx (l'ordre du DOM seul ne suffirait pas à garantir cet empilement une fois que
+   les deux ont un z-index explicite). */
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 80;
   display: flex;
   align-items: center;
   min-height: 72px;

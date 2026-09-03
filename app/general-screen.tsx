@@ -455,10 +455,16 @@ function DayDetailPanel({
             <span className={styles.dayPanelHeaderCell} role="columnheader">
               Tâche
             </span>
-            <span className={styles.dayPanelHeaderCell} role="columnheader">
+            <span
+              className={`${styles.dayPanelHeaderCell} ${styles.dayPanelOptionalColumn}`}
+              role="columnheader"
+            >
               Créé le
             </span>
-            <span className={styles.dayPanelHeaderCell} role="columnheader">
+            <span
+              className={`${styles.dayPanelHeaderCell} ${styles.dayPanelOptionalColumn}`}
+              role="columnheader"
+            >
               Délai
             </span>
           </div>
@@ -487,10 +493,17 @@ function DayDetailPanel({
                   </span>
                   <span className={styles.dayPanelItemTitle}>{task.title}</span>
                 </span>
-                <span className={styles.dayPanelCellCreated} role="cell">
+                <span
+                  className={`${styles.dayPanelCellCreated} ${styles.dayPanelOptionalColumn}`}
+                  role="cell"
+                >
                   {formatDueDate(task.createdAt)}
                 </span>
-                <span className={styles.dayPanelCellDelay} role="cell" data-overdue={overdue}>
+                <span
+                  className={`${styles.dayPanelCellDelay} ${styles.dayPanelOptionalColumn}`}
+                  role="cell"
+                  data-overdue={overdue}
+                >
                   {task.dueDate ? formatDueDateLong(task.dueDate) : "—"}
                   {overdue ? " · en retard" : ""}
                 </span>

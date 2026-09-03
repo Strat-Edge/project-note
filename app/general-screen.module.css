@@ -421,10 +421,47 @@
    plusieurs retours manuels successifs). Le `0` dans minmax(0, 1fr) est nécessaire pour que
    l'ellipse du titre de tâche (.dayPanelItemTitle) fonctionne à largeur égale plutôt que de
    forcer sa colonne à s'élargir au-delà de sa part. */
+/* 2 colonnes sur mobile (Projet/Tâche), 4 à partir de 768px (+ Créé le/Délai) — retour
+   Guillaume : "il n'y a pas la place pour tout afficher" sur mobile. Les cellules Créé le/
+   Délai (.dayPanelOptionalColumn ci-dessous) sont masquées en display:none sous 768px, donc
+   absentes du calcul de la grille — seules les 2 colonnes visibles participent alors à
+   grid-template-columns. */
 .dayPanelTable {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .dayPanelTable {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Colonnes Créé le/Délai — masquées sur mobile (cf. .dayPanelTable ci-dessus), réaffichées à
+   partir de 768px. Sélecteurs composés des deux côtés (pas .dayPanelOptionalColumn seule) :
+   même spécificité qu'une classe seule (0-0-1-0), la règle .dayPanelCellCreated/
+   .dayPanelCellDelay { display:flex } plus bas dans ce fichier (partagée avec
+   .dayPanelCellProject/.dayPanelCellTask) l'emportait en cascade (déclarée après, à
+   spécificité égale) — trouvé en vérification manuelle, les colonnes restaient visibles sur
+   mobile malgré cette règle. display réaffirmé explicitement par cellule (pas `revert`,
+   ambigu entre moteurs avec plusieurs classes de même spécificité) : flex pour les cellules de
+   données, block pour les en-têtes (jamais flex, cf. .dayPanelHeaderCell). */
+.dayPanelCellCreated.dayPanelOptionalColumn,
+.dayPanelCellDelay.dayPanelOptionalColumn,
+.dayPanelHeaderCell.dayPanelOptionalColumn {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .dayPanelCellCreated.dayPanelOptionalColumn,
+  .dayPanelCellDelay.dayPanelOptionalColumn {
+    display: flex;
+  }
+
+  .dayPanelHeaderCell.dayPanelOptionalColumn {
+    display: block;
+  }
 }
 
 .dayPanelRow {
