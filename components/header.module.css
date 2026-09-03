@@ -25,3 +25,16 @@
   height: 48px;
   width: auto;
 }
+
+/* Nom de marque en texte réel à droite de l'icône (retour Guillaume : "ajoute en texte à
+   droite de celui-ci 'Strat'Edge' en Times New Roman") — police explicitement demandée,
+   override volontaire de --font-family (sans-serif système) qui s'applique partout ailleurs
+   dans l'app. */
+.logoText {
+  margin-left: var(--space-3);
+  font-family: "Times New Roman", Times, serif;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--color-header-text);
+  white-space: nowrap;
+}
