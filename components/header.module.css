@@ -46,10 +46,14 @@
 /* Slogan à la suite du nom (retour Guillaume : "ajouter '- Former pour performer' à la suite
    de Strat'Edge, en plus petit mais même police") — hérite font-family de .logoText (Times
    New Roman), pas de redéclaration. Poids normal (pas 700) : distingue visuellement le
-   slogan du nom de marque sans changer de couleur. Masqué sous 768px — pas la place à côté du
-   "+" (position: fixed, hors du flux de ce header) sur un écran étroit. */
+   slogan du nom de marque sans changer de couleur. Sur mobile, passe à la ligne sous
+   "Strat'Edge" (display: block, malgré le white-space: nowrap hérité de .logoText — un enfant
+   block force son propre saut de ligne quel que soit le white-space du texte qu'il contient) —
+   pas la place à côté du "+" (position: fixed, hors du flux de ce header) sur un écran
+   étroit, retour Guillaume : "un moyen de mettre le Former pour performer sous Strat'Edge ?"
+   sur mobile. Revient sur la même ligne dès 768px (desktop, largeur disponible). */
 .logoSlogan {
-  display: none;
+  display: block;
   font-size: 16px;
   font-weight: 400;
 }
