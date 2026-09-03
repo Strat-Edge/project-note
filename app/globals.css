@@ -135,6 +135,13 @@ body {
 
 body {
   min-height: 100%;
+  /* Compense components/header.tsx passé en position: fixed (retour Guillaume : "sticky"
+     restait décroché du scroll sur Chrome mobile malgré une réinstallation complète de la
+     PWA — position: fixed ne dépend d'aucun calcul de conteneur de défilement, contrairement
+     à sticky) — le header sort du flux normal, ce padding-top (= sa hauteur exacte, 72px,
+     cf. components/header.module.css .header/.logo) rouvre la place qu'il occupait pour que
+     le contenu suivant ne se retrouve pas caché dessous. */
+  padding-top: 72px;
   display: flex;
   flex-direction: column;
   color: var(--color-text);
