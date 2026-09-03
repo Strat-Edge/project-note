@@ -63,7 +63,7 @@ export function GeneralScreen() {
   // sa liste de tâches en dessous — les puces de la grille sont trop petites pour être
   // lisibles). Indépendante de `referenceDate`/`viewMode` : naviguer d'un mois/semaine à
   // l'autre ne doit pas effacer la sélection, cf. même principe déjà appliqué à
-  // selectedProjectIds/showArchivedProjects (Dev Notes Story 4.1/4.2).
+  // selectedProjectIds (Dev Notes Story 4.1/4.2).
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -72,7 +72,6 @@ export function GeneralScreen() {
   // de la Story 4.1 : "le futur filtre de projet devra suivre le même principe, état
   // indépendant du mode d'affichage, jamais réinitialisé par setViewMode").
   const [selectedProjectIds, setSelectedProjectIds] = useState<Set<string>>(new Set());
-  const [showArchivedProjects, setShowArchivedProjects] = useState(false);
   // Erreurs et "chargé" séparés par source (revue de code) — un seul `loadError` partagé
   // par les deux abonnements liveQuery masquait un vrai échec de l'un derrière le succès de
   // l'autre (`setLoadError(false)` inconditionnel dans chaque callback `next`). Même précédent
@@ -147,21 +146,27 @@ export function GeneralScreen() {
     setViewMode(mode);
   }
 
-  const { active: activeProjects, archived: archivedProjects } = groupProjectsByStatus(projects);
+  // Story 4.2 — les projets archivés (archivedProjects) ne sont plus jamais montrés au
+  // calendrier (retour Guillaume : "supprime le filtre afficher les projets archivés, je ne
+  // veux pas de ce filtre inutile — si je veux que ça affiche, c'est à moi d'aller les
+  // désarchiver"). Filtre projet multi-sélection restant limité aux seuls projets actifs.
+  const { active: activeProjects } = groupProjectsByStatus(projects);
   // Revue de code (Story 4.2) — réconciliation contre activeProjects avant usage : si un
   // projet coché est archivé pendant que ce composant reste monté (scénario multi-appareil
   // plausible via liveQuery — le projet archivé côté sync réapparaît ici en temps réel),
   // hasProjectFilter (domain/calendar.ts) resterait sinon `true` sans qu'aucune case ne
-  // l'affiche plus comme cochée (le projet est passé côté archivedProjects), masquant
-  // silencieusement toutes les autres tâches actives et "Sans projet" sans moyen de s'en
-  // sortir dans l'UI. Purement dérivé, aucun effet de bord ni mutation de l'état
-  // `selectedProjectIds` lui-même — l'id périmé redevient actif de lui-même si le projet est
-  // désarchivé (Story 2.3).
+  // l'affiche plus comme cochée, masquant silencieusement toutes les autres tâches actives et
+  // "Sans projet" sans moyen de s'en sortir dans l'UI. Purement dérivé, aucun effet de bord ni
+  // mutation de l'état `selectedProjectIds` lui-même — l'id périmé redevient actif de lui-même
+  // si le projet est désarchivé (Story 2.3).
   const activeProjectIds = new Set(activeProjects.map((project) => project.id));
   const effectiveSelectedProjectIds = new Set(
     [...selectedProjectIds].filter((id) => activeProjectIds.has(id)),
   );
-  const filters: CalendarFilters = { selectedProjectIds: effectiveSelectedProjectIds, showArchivedProjects };
+  const filters: CalendarFilters = {
+    selectedProjectIds: effectiveSelectedProjectIds,
+    showArchivedProjects: false,
+  };
   const visibleTasks = filterTasksForCalendar(tasks, projects, filters);
   const projectsById = new Map(projects.map((project) => [project.id, project]));
   const tasksByDate = groupTasksByDueDate(visibleTasks);
@@ -234,14 +239,11 @@ export function GeneralScreen() {
         </p>
       ) : (
         <>
-          {(activeProjects.length > 0 || archivedProjects.length > 0) && (
+          {activeProjects.length > 0 && (
             <ProjectFilterControls
               activeProjects={activeProjects}
-              archivedCount={archivedProjects.length}
               selectedProjectIds={selectedProjectIds}
-              showArchivedProjects={showArchivedProjects}
               onToggleProject={toggleProjectFilter}
-              onToggleArchived={() => setShowArchivedProjects((current) => !current)}
             />
           )}
 
@@ -350,25 +352,19 @@ export function GeneralScreen() {
   );
 }
 
-// FR-28, FR-31 (Story 4.2). Case à cocher dupliquée littéralement du pattern
+// FR-28 (Story 4.2). Case à cocher dupliquée littéralement du pattern
 // .filter/.checkboxInput/.checkboxBox de project-view.module.css (DESIGN.md.components.
 // checkbox) — même convention déjà établie dans ce fichier pour .viewToggle (dupliqué de
 // switcher.module.css). Sous-composant interne non extrait sous components/ — aucun
 // composant Checkbox partagé n'existe encore dans ce projet (cf. Dev Notes de la story).
 function ProjectFilterControls({
   activeProjects,
-  archivedCount,
   selectedProjectIds,
-  showArchivedProjects,
   onToggleProject,
-  onToggleArchived,
 }: {
   activeProjects: Project[];
-  archivedCount: number;
   selectedProjectIds: ReadonlySet<string>;
-  showArchivedProjects: boolean;
   onToggleProject: (id: string) => void;
-  onToggleArchived: () => void;
 }) {
   return (
     <div
@@ -393,18 +389,6 @@ function ProjectFilterControls({
           {project.name}
         </label>
       ))}
-      {archivedCount > 0 && (
-        <label className={styles.filter}>
-          <input
-            type="checkbox"
-            className={styles.checkboxInput}
-            checked={showArchivedProjects}
-            onChange={onToggleArchived}
-          />
-          <span className={styles.checkboxBox} aria-hidden="true" />
-          {`Afficher les projets archivés (${archivedCount})`}
-        </label>
-      )}
     </div>
   );
 }

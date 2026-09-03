@@ -190,6 +190,37 @@ function toLocalDocument(row: PulledDocumentRow): Document {
   };
 }
 
+// Fusionne une ligne distante avec un projet déjà connu localement — jusqu'ici pullOnce()
+// n'insérait un projet QUE s'il était totalement inconnu localement (comportement "insertion
+// seule" hérité de la Story 3.2, jamais mis à jour depuis) : un archivage/désarchivage
+// (data/local/projects.ts) écrit bien `status` en local et l'envoie en file, mais l'AUTRE
+// appareil ignorait ensuite silencieusement toute ligne distante dont l'id existait déjà —
+// son statut local ne bougeait donc jamais (retour Guillaume : "j'ai archivé un projet [sur
+// le téléphone] et il ne s'est pas archivé sur l'ordinateur").
+//
+// Contrairement à mergeExistingTask ci-dessous, pas de résolution de conflit par champ à la
+// AD-3 (statusUpdatedAt/statusSyncedAt) : Project ne porte pas ces horodatages (domain/
+// project.ts) et un archivage est un geste bien trop rare pour justifier d'étendre son schéma
+// pour ça. Garde plus simple mais dans le même esprit qu'AD-3 ("jamais d'écrasement
+// silencieux d'un changement local pas encore synchronisé") : si une entrée de file est
+// encore en attente pour ce projet/ce champ, un archivage/désarchivage vient d'être fait sur
+// CET appareil et n'a pas encore atteint le serveur — le pull ne doit pas l'écraser avec une
+// valeur distante forcément plus ancienne ; le push qui suit dans le même cycle (AD-3, ordre
+// pull-puis-push) la fera converger normalement.
+async function mergeExistingProject(existing: Project, row: PulledProjectRow): Promise<void> {
+  const remoteStatus = row.status as Project["status"];
+  if (existing.status === remoteStatus) {
+    return;
+  }
+
+  const pendingStatusEntry = await db.syncQueue.get(syncQueueEntryId(existing.id, "status"));
+  if (pendingStatusEntry) {
+    return;
+  }
+
+  await db.projects.update(existing.id, { status: remoteStatus });
+}
+
 // Fusionne une ligne distante avec une tâche déjà connue localement (AD-3, Story 3.6) —
 // remplace l'ancien comportement "insertion seule" (Story 3.2) qui ignorait silencieusement
 // toute ligne distante dont l'id existait déjà en local. Compare status et priority
@@ -628,6 +659,8 @@ export async function pullOnce(): Promise<void> {
         const existing = await db.projects.get(row.id);
         if (!existing) {
           await db.projects.add(toLocalProject(row));
+        } else {
+          await mergeExistingProject(existing, row);
         }
       } catch {
         // Une ligne en échec (ex. ConstraintError d'une course avec un autre appel) ne doit pas
