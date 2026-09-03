@@ -1,25 +1,40 @@
-/* FAB "+" — DESIGN.md.components.fab. Ancré bas-droite, identique mobile/desktop
-   (EXPERIENCE.md Responsive & Platform), jamais masqué par le clavier virtuel
-   (position: fixed, pas de dépendance au flux de page). */
+/* FAB "+" — DESIGN.md.components.fab. Sur mobile, ancré en haut à droite, à hauteur du logo
+   dans la barre d'en-tête (retour Guillaume : "sur le calendrier... le délai apparaît, mais
+   j'ai le plus dessus" — en bas-droite, il masquait les puces de tâche sur la vue semaine du
+   calendrier général mobile). Desktop inchangé (bas-droite, 56px, cf. media query
+   ci-dessous) : le chevauchement ne s'y produit pas (grille plus large, moins de cellules
+   serrées). `position: fixed` dans les deux cas — jamais masqué par le clavier virtuel, pas de
+   dépendance au flux de page. */
 .fab {
   position: fixed;
+  top: 12px;
   right: var(--space-gutter);
-  bottom: var(--space-gutter);
   z-index: 90;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border: none;
   border-radius: var(--radius-xl);
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 28px;
+  font-size: 22px;
   font-weight: var(--font-display-weight);
   line-height: 1;
   box-shadow: 0 10px 24px rgba(47, 128, 237, 0.45);
   cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .fab {
+    top: auto;
+    right: var(--space-gutter);
+    bottom: var(--space-gutter);
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+  }
 }
 
 /* Overlay/modale — même pattern responsive que confirm-dialog.module.css (mobile plein

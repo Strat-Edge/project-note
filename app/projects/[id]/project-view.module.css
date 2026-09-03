@@ -689,8 +689,13 @@
 }
 
 /* Actions Télécharger/Supprimer de DocumentCard — sibling du bouton d'ouverture de la
-   carte (EXPERIENCE.md "Actions document"). Répartition 50/50 via > *, pas de classe
-   dédiée par bouton. */
+   carte (EXPERIENCE.md "Actions document"). Répartition 50/50 via > * sur mobile — corrigé
+   (retour Guillaume : "sur téléphone c'est parfait, il faut rien toucher"), colonne Documents
+   étroite, la carte occupe toute sa largeur, 50/50 reste une taille raisonnable. Sur desktop,
+   la section Documents pleine largeur (cf. .documentsSection ci-dessus, retour Guillaume du
+   passage aux 3 modules toujours visibles) rendait ce même 50/50 démesuré ("les boutons
+   prennent la moitié de l'écran, c'est beaucoup trop grand") — taille standard (contenu +
+   padding, cf. .ghostButton/.destructiveGhostButton) collée à gauche au-delà de 768px. */
 .documentActions {
   display: flex;
   gap: var(--space-3);
@@ -699,6 +704,12 @@
 
 .documentActions > * {
   flex: 1;
+}
+
+@media (min-width: 768px) {
+  .documentActions > * {
+    flex: none;
+  }
 }
 
 /* Aperçu inline d'un document (DocumentDetail) — plafonné en hauteur pour ne pas dominer la
