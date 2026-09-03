@@ -18,10 +18,11 @@ export function Header() {
       />
       <span className={styles.logoText}>
         Strat&apos;Edge
-        {/* Masqué sur mobile (cf. .logoSlogan, header.module.css) — pas la place à côté du "+"
-            en haut à droite (position: fixed, hors du flux du header) sans chevauchement sur
-            un petit écran. */}
-        <span className={styles.logoSlogan}> - Former pour performer</span>
+        {/* Sur mobile, passe sous "Strat'Edge" (cf. .logoSlogan, header.module.css) — pas de
+            "-" devant sur cette ligne dédiée (retour Guillaume), le séparateur " - " n'est
+            ajouté qu'à partir de 768px (CSS ::before, inline à la suite du nom) quand les deux
+            reviennent sur la même ligne. */}
+        <span className={styles.logoSlogan}>Former pour performer</span>
       </span>
     </header>
   );

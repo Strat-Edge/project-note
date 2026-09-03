@@ -51,7 +51,10 @@
    block force son propre saut de ligne quel que soit le white-space du texte qu'il contient) —
    pas la place à côté du "+" (position: fixed, hors du flux de ce header) sur un écran
    étroit, retour Guillaume : "un moyen de mettre le Former pour performer sous Strat'Edge ?"
-   sur mobile. Revient sur la même ligne dès 768px (desktop, largeur disponible). */
+   sur mobile. Revient sur la même ligne dès 768px (desktop, largeur disponible) ; le "-" n'est
+   pas dans le texte (retour Guillaume : "pas besoin du '-' devant... sur mobile", sur sa
+   propre ligne) — ajouté par ::before uniquement à partir de 768px, où le slogan revient à la
+   suite du nom sur une seule ligne. */
 .logoSlogan {
   display: block;
   font-size: 16px;
@@ -59,6 +62,10 @@
 }
 
 @media (min-width: 768px) {
+  .logoSlogan::before {
+    content: " - ";
+  }
+
   .logoSlogan {
     display: inline;
   }
