@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { liveQuery } from "dexie";
-import type { CalendarFilters, CalendarViewMode, Priority, Project, Task } from "@/domain";
+import type { CalendarFilters, CalendarViewMode, Priority, Project, Task, TaskStatus } from "@/domain";
 import {
   dateKey,
   filterTasksForCalendar,
@@ -29,6 +29,15 @@ const PRIORITY_LETTERS: Record<Priority, string> = {
   low: "B",
   normal: "N",
   high: "H",
+};
+
+// Mêmes libellés que STATUS_OPTIONS (app/projects/[id]/project-view.tsx) — colonne Statut
+// du tableau du jour (retour Guillaume : "rajouter une cinquième colonne... le statut de la
+// tâche").
+const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: "à faire",
+  in_progress: "en cours",
+  done: "terminé",
 };
 
 // Mois en entier (pas "short") — colonne Délai du tableau du jour uniquement (retour
@@ -410,9 +419,11 @@ function DayDetailPanel({
       {tasks.length === 0 ? (
         <p className={styles.empty}>Aucune tâche à cette date.</p>
       ) : (
-        // Vrai tableau à 3 colonnes alignées (retour Guillaume : "une sorte de tableau
-        // (colonne) avec première colonne le projet, nom de la tâche et priorité, et
-        // délai") — un seul CSS grid partagé par l'en-tête ET les lignes (chaque wrapper de
+        // Vrai tableau à colonnes alignées : Projet / Tâche / Créé le / Délai / Statut, les 3
+        // dernières masquées sur mobile (retour Guillaume : "une sorte de tableau (colonne)
+        // avec première colonne le projet, nom de la tâche et priorité, et délai", puis
+        // "rajouter une cinquième colonne... le statut de la tâche", desktop uniquement) — un
+        // seul CSS grid partagé par l'en-tête ET les lignes (chaque wrapper de
         // ligne est display:contents, cf. general-screen.module.css) : les 3 colonnes
         // s'alignent verticalement d'une ligne à l'autre, ce qu'un simple flex row par ligne
         // (version précédente) ne garantissait pas.
@@ -435,6 +446,12 @@ function DayDetailPanel({
               role="columnheader"
             >
               Délai
+            </span>
+            <span
+              className={`${styles.dayPanelHeaderCell} ${styles.dayPanelOptionalColumn}`}
+              role="columnheader"
+            >
+              Statut
             </span>
           </div>
 
@@ -469,6 +486,13 @@ function DayDetailPanel({
                 >
                   {task.dueDate ? formatDueDateLong(task.dueDate) : "—"}
                   {overdue ? " · en retard" : ""}
+                </span>
+                <span
+                  className={`${styles.dayPanelCellStatus} ${styles.dayPanelOptionalColumn}`}
+                  role="cell"
+                  data-status={task.status}
+                >
+                  {TASK_STATUS_LABELS[task.status]}
                 </span>
               </>
             );

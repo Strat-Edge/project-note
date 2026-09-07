@@ -382,22 +382,23 @@
   color: var(--color-heading);
 }
 
-/* Tableau à 4 colonnes alignées, TOUTES de même largeur (retour Guillaume : "quand je dis
+/* Tableau à 5 colonnes alignées, TOUTES de même largeur (retour Guillaume : "quand je dis
    colonnes réparties je veux dire de même taille") — un seul CSS grid partagé par l'en-tête
    ET toutes les lignes : chaque wrapper de ligne (.dayPanelRow, y compris l'en-tête) est
    display:contents, ses cellules deviennent donc des items directs de CE grid, garantissant
    un alignement vertical strict colonne par colonne (même mécanisme que .week/
    display:contents dans la grille du calendrier ci-dessus). minmax(0, 1fr) (pas `auto`) sur
-   les 4 — un essai précédent avec `auto` sur Créé le/Délai les faisait grandir pour absorber
+   les 5 — un essai précédent avec `auto` sur Créé le/Délai les faisait grandir pour absorber
    l'espace libre en l'absence de piste flexible (comportement `auto` du spec CSS Grid, pas un
    bug : sans piste `fr`, l'espace libre se répartit quand même sur les pistes `auto`), les
    écartant l'une de l'autre au lieu de les garder groupées ("les colonnes ne collent pas",
    plusieurs retours manuels successifs). Le `0` dans minmax(0, 1fr) est nécessaire pour que
    l'ellipse du titre de tâche (.dayPanelItemTitle) fonctionne à largeur égale plutôt que de
    forcer sa colonne à s'élargir au-delà de sa part. */
-/* 2 colonnes sur mobile (Projet/Tâche), 4 à partir de 768px (+ Créé le/Délai) — retour
-   Guillaume : "il n'y a pas la place pour tout afficher" sur mobile. Les cellules Créé le/
-   Délai (.dayPanelOptionalColumn ci-dessous) sont masquées en display:none sous 768px, donc
+/* 2 colonnes sur mobile (Projet/Tâche), 5 à partir de 768px (+ Créé le/Délai/Statut) —
+   retour Guillaume : "il n'y a pas la place pour tout afficher" sur mobile, et "sur la
+   version ordinateur uniquement" pour la colonne Statut. Les cellules optionnelles
+   (.dayPanelOptionalColumn ci-dessous) sont masquées en display:none sous 768px, donc
    absentes du calcul de la grille — seules les 2 colonnes visibles participent alors à
    grid-template-columns. */
 .dayPanelTable {
@@ -408,28 +409,31 @@
 
 @media (min-width: 768px) {
   .dayPanelTable {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
-/* Colonnes Créé le/Délai — masquées sur mobile (cf. .dayPanelTable ci-dessus), réaffichées à
-   partir de 768px. Sélecteurs composés des deux côtés (pas .dayPanelOptionalColumn seule) :
-   même spécificité qu'une classe seule (0-0-1-0), la règle .dayPanelCellCreated/
-   .dayPanelCellDelay { display:flex } plus bas dans ce fichier (partagée avec
-   .dayPanelCellProject/.dayPanelCellTask) l'emportait en cascade (déclarée après, à
-   spécificité égale) — trouvé en vérification manuelle, les colonnes restaient visibles sur
-   mobile malgré cette règle. display réaffirmé explicitement par cellule (pas `revert`,
-   ambigu entre moteurs avec plusieurs classes de même spécificité) : flex pour les cellules de
-   données, block pour les en-têtes (jamais flex, cf. .dayPanelHeaderCell). */
+/* Colonnes Créé le/Délai/Statut — masquées sur mobile (cf. .dayPanelTable ci-dessus),
+   réaffichées à partir de 768px. Sélecteurs composés des deux côtés (pas
+   .dayPanelOptionalColumn seule) : même spécificité qu'une classe seule (0-0-1-0), la règle
+   .dayPanelCellCreated/.dayPanelCellDelay/.dayPanelCellStatus { display:flex } plus bas dans
+   ce fichier (partagée avec .dayPanelCellProject/.dayPanelCellTask) l'emportait en cascade
+   (déclarée après, à spécificité égale) — trouvé en vérification manuelle, les colonnes
+   restaient visibles sur mobile malgré cette règle. display réaffirmé explicitement par
+   cellule (pas `revert`, ambigu entre moteurs avec plusieurs classes de même spécificité) :
+   flex pour les cellules de données, block pour les en-têtes (jamais flex, cf.
+   .dayPanelHeaderCell). */
 .dayPanelCellCreated.dayPanelOptionalColumn,
 .dayPanelCellDelay.dayPanelOptionalColumn,
+.dayPanelCellStatus.dayPanelOptionalColumn,
 .dayPanelHeaderCell.dayPanelOptionalColumn {
   display: none;
 }
 
 @media (min-width: 768px) {
   .dayPanelCellCreated.dayPanelOptionalColumn,
-  .dayPanelCellDelay.dayPanelOptionalColumn {
+  .dayPanelCellDelay.dayPanelOptionalColumn,
+  .dayPanelCellStatus.dayPanelOptionalColumn {
     display: flex;
   }
 
@@ -460,7 +464,8 @@
 .dayPanelCellProject,
 .dayPanelCellTask,
 .dayPanelCellCreated,
-.dayPanelCellDelay {
+.dayPanelCellDelay,
+.dayPanelCellStatus {
   display: flex;
   align-items: center;
   min-width: 0;
@@ -474,16 +479,18 @@
   .dayPanelCellProject,
   .dayPanelCellTask,
   .dayPanelCellCreated,
-  .dayPanelCellDelay {
+  .dayPanelCellDelay,
+  .dayPanelCellStatus {
     border-color: var(--color-border-dark);
   }
 }
 
 /* font-label-size (pas font-caption-size) — retour Guillaume : "les lignes en dessous des
    titres de colonne écris un peu plus grand". Même bump appliqué à .dayPanelCellProject/
-   .dayPanelItemTitle/.dayPanelCellDelay ci-dessous, pour rester cohérent entre les 4
-   colonnes. */
-.dayPanelCellCreated {
+   .dayPanelItemTitle/.dayPanelCellDelay/.dayPanelCellStatus ci-dessous, pour rester cohérent
+   entre les 5 colonnes. */
+.dayPanelCellCreated,
+.dayPanelCellStatus {
   color: var(--color-muted);
   font-size: var(--font-label-size);
   font-weight: var(--font-caption-weight);
@@ -491,7 +498,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .dayPanelCellCreated {
+  .dayPanelCellCreated,
+  .dayPanelCellStatus {
     color: var(--color-muted-dark);
   }
 }
