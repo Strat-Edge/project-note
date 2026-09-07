@@ -2,6 +2,14 @@
 // Ne dépend d'aucun autre module du projet (cf. AD-2) : les 8 couleurs de rotation sont
 // représentées par des clés, pas par leurs valeurs hex (qui vivent en CSS, cf. app/globals.css).
 
+// La couleur n'est plus affichée nulle part dans l'UI (retour Guillaume : "j'ai trop de
+// projets, les couleurs se répètent, je n'en veux plus") — mais le champ reste écrit en
+// interne (rotation automatique, cf. nextProjectColor) parce que la colonne Postgres
+// `projects.color` est `not null` sans valeur par défaut (cf. migration SQL de la Story
+// 3.2) : ne plus l'envoyer casserait la synchronisation de tout nouveau projet. Un jour où
+// cette colonne sera retirée/rendue nullable côté Supabase (migration hors du périmètre de
+// cette story, jamais exécutée automatiquement), ce type et cette rotation pourront être
+// supprimés avec elle.
 export type ProjectColorKey =
   | "project-1"
   | "project-2"
@@ -12,7 +20,6 @@ export type ProjectColorKey =
   | "project-7"
   | "project-8";
 
-// Ordre de rotation exact de DESIGN.md (components.project-color.rotation).
 export const PROJECT_COLOR_ROTATION: readonly ProjectColorKey[] = [
   "project-1",
   "project-2",
@@ -76,4 +83,17 @@ export function archiveProject(project: Project): Project {
 
 export function unarchiveProject(project: Project): Project {
   return { ...project, status: "active" };
+}
+
+// Renommer/redécrire un projet existant, sans toucher à son contenu (tâches/notes/documents
+// restent liés par id, jamais par nom) — retour Guillaume : "je ne peux pas modifier un
+// projet qui a déjà été créé". `name` revalidé par l'appelant via validateProjectName (même
+// convention que createProject/archiveProject : le domaine n'échoue jamais silencieusement
+// sur une valeur déjà validée en amont).
+export function updateProjectDetails(
+  project: Project,
+  name: string,
+  description: string,
+): Project {
+  return { ...project, name: name.trim(), description: description.trim() };
 }

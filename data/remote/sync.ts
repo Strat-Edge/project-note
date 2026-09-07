@@ -316,3 +316,59 @@ export async function deleteDocumentRow(
     throw error;
   }
 }
+
+// Même précédent que getDocumentStoragePath ci-dessus, appliqué à `notes.audio_path`
+// (bucket "audio", Story 5.2) — lu AVANT deleteNoteRow pour que le retrait Storage
+// (deleteNoteAndAudio, sync/server.ts) sache quel fichier retirer une fois la ligne
+// supprimée. null si la note n'a jamais eu d'audio (note texte) ou n'existe déjà plus.
+export async function getNoteAudioStoragePath(
+  client: SupabaseClient,
+  entityId: string,
+): Promise<string | null> {
+  const { data, error } = await client
+    .from("notes")
+    .select("audio_path")
+    .eq("id", entityId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+  if (!data) {
+    return null;
+  }
+
+  return data.audio_path;
+}
+
+// Suppression définitive d'une note — même précédent/idempotence que deleteDocumentRow.
+// Premier appelant réel : deleteProject (data/local/projects.ts), les notes n'ayant jusqu'ici
+// jamais été supprimables individuellement (cf. Dev Notes Story 5.1 : "archivage seulement").
+export async function deleteNoteRow(
+  client: SupabaseClient,
+  entityId: string,
+): Promise<void> {
+  const { error } = await client.from("notes").delete().eq("id", entityId);
+  if (error) {
+    throw error;
+  }
+}
+
+// Suppression définitive d'un projet (retour Guillaume : depuis l'onglet Archives) — RLS
+// ("projects_owner" ou équivalent, cf. migration Story 1.1) restreint déjà la portée à
+// l'utilisateur courant. La ligne `projects` supprimée cascade côté Postgres vers
+// notes/documents (`on delete cascade`, migrations Stories 5.1/6.1) et vers tasks
+// (`project_id` mis à `null`, `on delete set null`, migration Story 3.2) — filet de sécurité
+// FK, pas le mécanisme principal : deleteProject (data/local/projects.ts) pousse déjà des
+// suppressions/mises à jour explicites pour chaque note/document/tâche concernée, seul moyen
+// de déclencher aussi le nettoyage Storage (audio/documents), que la cascade Postgres seule
+// ne fait jamais. Même idempotence que deleteDocumentRow.
+export async function deleteProjectRow(
+  client: SupabaseClient,
+  entityId: string,
+): Promise<void> {
+  const { error } = await client.from("projects").delete().eq("id", entityId);
+  if (error) {
+    throw error;
+  }
+}

@@ -68,49 +68,6 @@
   color: var(--color-danger);
 }
 
-.swatchFieldset {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-.swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.swatch {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: 2px solid transparent;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  cursor: pointer;
-}
-
-.swatch[data-selected="true"] {
-  border-color: var(--color-primary);
-}
-
-.swatch:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.swatchChip {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-sm);
-}
-
 .actions {
   display: flex;
   gap: var(--space-3);
@@ -166,6 +123,7 @@
 
 .projectCard {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
@@ -179,13 +137,6 @@
   .projectCard {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   }
-}
-
-.projectSwatch {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--radius-sm);
 }
 
 .projectName {
@@ -218,6 +169,24 @@
 }
 
 .rowAction:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.deleteAction {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-danger);
+  font-size: var(--font-label-size);
+  font-weight: var(--font-label-weight);
+  cursor: pointer;
+}
+
+.deleteAction:disabled {
   opacity: 0.6;
   cursor: default;
 }

@@ -441,11 +441,6 @@ export function ProjectView({ projectId }: { projectId: string }) {
   return (
     <main className={styles.main}>
       <div className={styles.header}>
-        <span
-          className={styles.projectSwatch}
-          style={{ backgroundColor: `var(--color-${project.color})` }}
-          aria-hidden="true"
-        />
         <h1 className={styles.title}>{project.name}</h1>
         {project.status === "archived" && (
           <span className={styles.statusPill}>

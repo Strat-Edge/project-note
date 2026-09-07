@@ -41,14 +41,6 @@
      dédié : le recyclage aurait fait hériter ce segment de la recoloration priorité
      ci-dessus, sans rapport avec lui. */
   --color-status-done-text: #0f2a44;
-  --color-project-1: #2f9e44;
-  --color-project-2: #e8590c;
-  --color-project-3: #9c36b5;
-  --color-project-4: #e64980;
-  --color-project-5: #f08c00;
-  --color-project-6: #0ca678;
-  --color-project-7: #c2255c;
-  --color-project-8: #495057;
 
   /* Palette brute clair/sombre — non réactive, cf. commentaire ci-dessus */
   --color-bg-alt: #e9eef5;
@@ -139,8 +131,8 @@ body {
      restait décroché du scroll sur Chrome mobile malgré une réinstallation complète de la
      PWA — position: fixed ne dépend d'aucun calcul de conteneur de défilement, contrairement
      à sticky) — le header sort du flux normal, ce padding-top (= sa hauteur exacte, 72px,
-     cf. components/header.module.css .header/.logo) rouvre la place qu'il occupait pour que
-     le contenu suivant ne se retrouve pas caché dessous. */
+     cf. components/header.module.css .header) rouvre la place qu'il occupait pour que le
+     contenu suivant ne se retrouve pas caché dessous. */
   padding-top: 72px;
   display: flex;
   flex-direction: column;

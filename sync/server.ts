@@ -7,8 +7,15 @@ import {
   fetchAllProjectsTasksNotesAndDocuments,
   getDocumentStoragePath,
   deleteDocumentRow,
+  getNoteAudioStoragePath,
+  deleteNoteRow,
+  deleteProjectRow,
 } from "@/data/remote/sync";
-import { uploadNoteAudio, createNoteAudioSignedUrl } from "@/data/remote/storage";
+import {
+  uploadNoteAudio,
+  createNoteAudioSignedUrl,
+  removeNoteAudioFile,
+} from "@/data/remote/storage";
 import {
   uploadDocumentFile,
   createDocumentSignedUrl,
@@ -70,19 +77,62 @@ export async function pushQueueEntries(
     }
   }
 
-  for (const group of [...projectGroups, ...taskGroups, ...noteGroups, ...documentGroups]) {
+  // enqueueDelete (data/local/sync-queue.ts) purge toute autre entrée en attente pour la même
+  // entité avant d'ajouter sa suppression (AD-3) : un groupe ne peut donc jamais mélanger une
+  // suppression avec un autre champ, ce qui rend cette classification par groupe fiable.
+  const isDeleteGroup = (group: SyncQueueEntry[]) =>
+    group.some((entry) => entry.operation === "delete");
+
+  // Suppression d'un projet archivé (retour Guillaume, cf. deleteProject data/local/
+  // projects.ts) : ses documents/notes sont supprimés individuellement (nécessaire pour que
+  // deleteDocumentAndFile/deleteNoteAndAudio nettoient aussi leurs fichiers Storage AVANT que
+  // la ligne ne disparaisse, storage_path/audio_path devenant illisible une fois la ligne
+  // partie). Ordre INVERSE de celui utilisé pour create/update ci-dessus (enfants avant
+  // parent, pas l'inverse) : sans lui, une suppression de projet traitée dans le même lot que
+  // celles de ses documents/notes cascaderait déjà côté Postgres (`on delete cascade`, cf.
+  // migrations Stories 5.1/6.1) avant leur tour, orphelinant leurs fichiers Storage. Les
+  // écritures normales (create/update) gardent l'ordre project-avant-enfants existant, sans
+  // objet ici puisque la ligne existe déjà.
+  const documentDeletes = documentGroups.filter(isDeleteGroup);
+  const documentWrites = documentGroups.filter((group) => !isDeleteGroup(group));
+  const noteDeletes = noteGroups.filter(isDeleteGroup);
+  const noteWrites = noteGroups.filter((group) => !isDeleteGroup(group));
+  const projectDeletes = projectGroups.filter(isDeleteGroup);
+  const projectWrites = projectGroups.filter((group) => !isDeleteGroup(group));
+
+  const orderedGroups = [
+    ...documentDeletes,
+    ...noteDeletes,
+    ...projectDeletes,
+    ...projectWrites,
+    ...taskGroups,
+    ...noteWrites,
+    ...documentWrites,
+  ];
+
+  for (const group of orderedGroups) {
     const { entity, entityId } = group[0];
     const ids = group.map((entry) => entry.id);
 
     try {
       if (entity === "project") {
-        const fields = Object.fromEntries(group.map((entry) => [entry.field, entry.value]));
-        await upsertProjectFields(client, entityId, fields);
+        const deleteEntry = group.find((entry) => entry.operation === "delete");
+        if (deleteEntry) {
+          await deleteProjectRow(client, entityId);
+        } else {
+          const fields = Object.fromEntries(group.map((entry) => [entry.field, entry.value]));
+          await upsertProjectFields(client, entityId, fields);
+        }
       } else if (entity === "note") {
-        // Groupe brut (pas aplati) : upsertNoteFields a désormais besoin de l'updatedAt par
-        // champ pour peupler transcription_updated_at (AD-3, Story 5.3) — même raison
-        // qu'upsertTaskFields depuis la Story 3.6.
-        await upsertNoteFields(client, entityId, group);
+        const deleteEntry = group.find((entry) => entry.operation === "delete");
+        if (deleteEntry) {
+          await deleteNoteAndAudio(client, entityId);
+        } else {
+          // Groupe brut (pas aplati) : upsertNoteFields a désormais besoin de l'updatedAt par
+          // champ pour peupler transcription_updated_at (AD-3, Story 5.3) — même raison
+          // qu'upsertTaskFields depuis la Story 3.6.
+          await upsertNoteFields(client, entityId, group);
+        }
       } else if (entity === "document") {
         // FR-21 : l'entrée de suppression prime sur tout champ (AD-3, cf. enqueueDelete,
         // data/local/sync-queue.ts) — le groupe ne contient normalement jamais plus d'une
@@ -152,6 +202,22 @@ export async function deleteDocumentAndFile(
     await removeDocumentFile(client, storagePath);
   }
   await deleteDocumentRow(client, entityId);
+}
+
+// Suppression définitive d'une note — même précédent/ordre que deleteDocumentAndFile
+// ci-dessus (retire le fichier Storage, si un audio existe, avant la ligne Postgres, pour la
+// même raison d'idempotence en cas de retry après échec partiel). Premier appelant réel :
+// deleteProject (data/local/projects.ts) — une note texte n'a pas d'audioPath (toujours
+// null), getNoteAudioStoragePath renvoie alors null et aucun retrait Storage n'est tenté.
+export async function deleteNoteAndAudio(
+  client: SupabaseClient,
+  entityId: string,
+): Promise<void> {
+  const audioPath = await getNoteAudioStoragePath(client, entityId);
+  if (audioPath) {
+    await removeNoteAudioFile(client, audioPath);
+  }
+  await deleteNoteRow(client, entityId);
 }
 
 // Même précédent que getNoteAudioPlaybackUrl ci-dessus (Story 5.2) : vérifie l'appartenance

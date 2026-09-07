@@ -30,10 +30,12 @@
   color: var(--color-header-text);
 }
 
-/* height: 72px (= min-height du header) — flush haut/bas, cf. commentaire ci-dessus. */
+/* 70px (retour Guillaume : "le logo 2px plus petit") — header inchangé (72px, ci-dessus),
+   le logo n'occupe donc plus toute sa hauteur : léger espace haut/bas désormais visible,
+   c'est le but recherché ("qu'il rentre un peu mieux dans le header"), pas un effet de bord. */
 .logo {
   display: block;
-  height: 72px;
+  height: 70px;
   width: auto;
 }
 
@@ -75,5 +77,41 @@
 
   .logoSlogan {
     display: inline;
+  }
+}
+
+/* Accès compte — poussé à l'extrémité droite du header via margin-left: auto, seul autre
+   élément flex de ce header avec le logo/logoText. */
+.accountLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  border-radius: var(--radius-full);
+  color: var(--color-header-text);
+}
+
+.accountLink:hover,
+.accountLink:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.accountLink:focus-visible {
+  outline: 2px solid var(--color-header-text);
+  outline-offset: 2px;
+}
+
+/* Sous 768px, le FAB "+" (position: fixed, z-index 90 > ce header à 80) occupe déjà le coin
+   supérieur droit de l'écran — top:12px, right: var(--space-gutter), 48px de large, cf.
+   app/capture-flow.module.css .fab. Sans ce dégagement, ce lien serait peint dessous par le
+   FAB et donc inatteignable au tap. Recul = largeur FAB (48px) + son propre right (20px) +
+   une marge de respiration (8px) = 76px. À partir de 768px, le FAB repasse en bas-droite
+   (media query miroir, capture-flow.module.css) : le dégagement n'a plus lieu d'être. */
+@media (max-width: 767px) {
+  .accountLink {
+    margin-right: 76px;
   }
 }

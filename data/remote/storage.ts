@@ -68,3 +68,14 @@ export async function createNoteAudioSignedUrl(
   }
   return data.signedUrl;
 }
+
+// Retire le fichier audio du bucket Storage — même précédent que removeDocumentFile
+// (data/remote/document-storage.ts, Story 6.3) : appelée par sync/server.ts
+// (deleteNoteAndAudio) après lecture du audio_path, jamais avant. `.remove()` sur un chemin
+// déjà absent ne lève pas d'erreur côté Supabase Storage — naturellement idempotent.
+export async function removeNoteAudioFile(client: SupabaseClient, path: string): Promise<void> {
+  const { error } = await client.storage.from(AUDIO_BUCKET).remove([path]);
+  if (error) {
+    throw error;
+  }
+}

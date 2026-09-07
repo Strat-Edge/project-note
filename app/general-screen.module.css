@@ -187,15 +187,6 @@
   outline-offset: 2px;
 }
 
-/* Pastille de couleur projet dans le libellé du filtre — même swatch que .dayPanelCellProject
-   i (ci-dessous), taille réduite pour tenir dans une case à cocher. */
-.filterSwatch {
-  width: 9px;
-  height: 9px;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -310,29 +301,12 @@
 
 /* Puce de priorité (calendrier) — DESIGN.md.components.meta-pill note + Component Patterns
    "Même code visuel que la puce de priorité des cartes ; n'affecte jamais la position de la
-   tâche dans la grille." Deux marqueurs par tâche, pas un seul (cf. Dev Notes) : le point
-   coloré par PROJET (FR-29) et la puce H/N/B colorée par PRIORITÉ (FR-32) sont deux
-   exigences indépendantes de la story, chacune avec sa propre encodage couleur — aucune
-   des deux ne peut se substituer à l'autre sans en perdre le sens. */
+   tâche dans la grille." */
 .dots {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   margin-top: auto;
-}
-
-.dotGroup {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.projectDot {
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radius-full);
-  display: block;
-  flex-shrink: 0;
 }
 
 .priorityDot {
@@ -540,13 +514,6 @@ a.dayPanelRow {
   .dayPanelCellProject {
     color: var(--color-muted-dark);
   }
-}
-
-.dayPanelCellProject i {
-  width: 9px;
-  height: 9px;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
 }
 
 .dayPanelCellTask {

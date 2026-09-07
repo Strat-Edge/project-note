@@ -13,13 +13,6 @@
   gap: var(--space-3);
 }
 
-.projectSwatch {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--radius-sm);
-}
-
 .title {
   font-size: var(--font-heading-size);
   font-weight: var(--font-heading-weight);

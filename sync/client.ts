@@ -669,6 +669,79 @@ export async function pullOnce(): Promise<void> {
       }
     }
 
+    // Réconciliation de suppression cross-appareil (retour Guillaume : supprimer
+    // définitivement un projet archivé) — même principe que le bloc équivalent pour Document
+    // plus bas (Story 6.3) : deleteProject (data/local/projects.ts) retire déjà tout
+    // localement sur l'appareil qui supprime (écriture optimiste, AD-1), ce bloc couvre
+    // l'AUTRE appareil. fetchAllProjectsTasksNotesAndDocuments renvoie l'état complet des
+    // projets restants (RLS, pas de filtre incrémental) : un projet encore présent en local
+    // mais absent du snapshot a donc été soit supprimé côté serveur, soit jamais encore
+    // poussé depuis cet appareil (créé hors ligne, pull arrivé avant le premier push réussi).
+    // Garde "aucune entrée de file encore en attente" (au lieu d'un simple marqueur comme
+    // Document.storagePath, Project n'en a pas) pour distinguer les deux cas : une entrée
+    // "create" encore pending signifie que ce projet n'a jamais existé côté serveur, il ne
+    // doit surtout pas être traité comme "supprimé ailleurs".
+    const remoteProjectIds = new Set(snapshot.projects.map((row) => row.id));
+    const localProjects = await db.projects.toArray();
+    for (const project of localProjects) {
+      if (remoteProjectIds.has(project.id)) {
+        continue;
+      }
+      const pendingCount = await db.syncQueue.where("entityId").equals(project.id).count();
+      if (pendingCount > 0) {
+        continue;
+      }
+      try {
+        // Forme tableau (pas les surcharges à table individuelle, plafonnées à 5 par les
+        // types Dexie) : nécessaire dès que la transaction touche plus de 5 tables.
+        await db.transaction(
+          "rw",
+          [
+            db.projects,
+            db.tasks,
+            db.notes,
+            db.noteAudio,
+            db.pendingTranscriptions,
+            db.documents,
+            db.documentFiles,
+            db.syncQueue,
+          ],
+          async (tx) => {
+            await tx.table("projects").delete(project.id);
+            await tx.table("tasks").where("projectId").equals(project.id).modify({ projectId: null });
+
+            const noteIds = (await tx
+              .table("notes")
+              .where("projectId")
+              .equals(project.id)
+              .primaryKeys()) as string[];
+            await tx.table("notes").where("projectId").equals(project.id).delete();
+            for (const noteId of noteIds) {
+              await tx.table("noteAudio").delete(noteId);
+              await tx.table("pendingTranscriptions").delete(noteId);
+            }
+
+            const documentIds = (await tx
+              .table("documents")
+              .where("projectId")
+              .equals(project.id)
+              .primaryKeys()) as string[];
+            await tx.table("documents").where("projectId").equals(project.id).delete();
+            for (const documentId of documentIds) {
+              await tx.table("documentFiles").delete(documentId);
+            }
+
+            // Purge toute entrée de file orpheline pour ce projet et son contenu — rien à
+            // pousser pour des entités qui n'existent plus nulle part, même rationale
+            // qu'enqueueDelete/le bloc équivalent Document ci-dessous.
+            await tx.table("syncQueue").where("entityId").equals(project.id).delete();
+          },
+        );
+      } catch {
+        // idem — rattrapé au prochain pull.
+      }
+    }
+
     for (const row of snapshot.tasks) {
       try {
         const existing = await db.tasks.get(row.id);

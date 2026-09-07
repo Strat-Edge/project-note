@@ -836,7 +836,6 @@ export function CaptureFlow() {
                           key={project.id}
                           label={project.name}
                           selected={projectSelection === project.id}
-                          swatchColor={`var(--color-${project.color})`}
                           onClick={() => selectProject(project.id)}
                         />
                       ))}
@@ -1247,13 +1246,11 @@ function OptionButton({
   label,
   selected,
   onClick,
-  swatchColor,
   priority,
 }: {
   label: string;
   selected: boolean;
   onClick: () => void;
-  swatchColor?: string;
   priority?: Priority;
 }) {
   return (
@@ -1265,13 +1262,6 @@ function OptionButton({
       data-priority={priority}
       onClick={onClick}
     >
-      {swatchColor && (
-        <span
-          className={styles.optionSwatch}
-          style={{ backgroundColor: swatchColor }}
-          aria-hidden="true"
-        />
-      )}
       {label}
     </button>
   );

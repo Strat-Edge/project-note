@@ -10,6 +10,7 @@ export {
   groupProjectsByStatus,
   archiveProject,
   unarchiveProject,
+  updateProjectDetails,
 } from "./project";
 export type {
   Project,

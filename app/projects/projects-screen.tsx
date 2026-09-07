@@ -2,16 +2,11 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import {
-  PROJECT_COLOR_ROTATION,
-  groupProjectsByStatus,
-  nextProjectColor,
-  validateProjectName,
-  type Project,
-  type ProjectColorKey,
-} from "@/domain";
+import { groupProjectsByStatus, validateProjectName, type Project } from "@/domain";
 import {
   createProject,
+  updateProject,
+  deleteProject,
   listProjects,
   archiveProject,
   unarchiveProject,
@@ -24,26 +19,14 @@ const SUBMIT_FAILED_MESSAGE = "La création a échoué. Réessayez.";
 const LOAD_FAILED_MESSAGE = "Impossible de charger la liste des projets.";
 const ARCHIVE_FAILED_MESSAGE = "L'archivage a échoué. Réessayez.";
 const UNARCHIVE_FAILED_MESSAGE = "Le désarchivage a échoué. Réessayez.";
+const UPDATE_FAILED_MESSAGE = "La modification a échoué. Réessayez.";
+const DELETE_FAILED_MESSAGE = "La suppression a échoué. Réessayez.";
 const EMPTY_MESSAGE =
   "Aucun projet pour l'instant. Cliquez sur « Nouveau projet » pour en créer un.";
 
-// Labels de présentation uniquement — même logique que COLOR_LABELS ci-dessous.
 const STATUS_LABELS: Record<Project["status"], string> = {
   active: "Actif",
   archived: "Archivé",
-};
-
-// Labels de présentation uniquement (accessibilité) — domain/ ne connaît que les clés,
-// pas ces noms ni les valeurs hex (cf. Dev Notes de la Story 2.1).
-const COLOR_LABELS: Record<ProjectColorKey, string> = {
-  "project-1": "Vert",
-  "project-2": "Orange",
-  "project-3": "Violet",
-  "project-4": "Rose",
-  "project-5": "Ambre",
-  "project-6": "Sarcelle",
-  "project-7": "Magenta",
-  "project-8": "Gris",
 };
 
 export function ProjectsScreen() {
@@ -53,9 +36,6 @@ export function ProjectsScreen() {
   const [formOpen, setFormOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedColor, setSelectedColor] = useState<ProjectColorKey>(
-    PROJECT_COLOR_ROTATION[0],
-  );
   const [nameError, setNameError] = useState<string | undefined>();
   const [submitError, setSubmitError] = useState<string | undefined>();
   const [pending, setPending] = useState(false);
@@ -63,6 +43,16 @@ export function ProjectsScreen() {
   const [actionError, setActionError] = useState<string | undefined>();
   const [confirmTarget, setConfirmTarget] = useState<Project | null>(null);
   const [statusFilter, setStatusFilter] = useState<Project["status"]>("active");
+
+  const [editTarget, setEditTarget] = useState<Project | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editNameError, setEditNameError] = useState<string | undefined>();
+  const [editSubmitError, setEditSubmitError] = useState<string | undefined>();
+  const [editPending, setEditPending] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [deleteError, setDeleteError] = useState<string | undefined>();
 
   const { active, archived } = groupProjectsByStatus(projects);
   const visibleProjects = statusFilter === "active" ? active : archived;
@@ -78,18 +68,16 @@ export function ProjectsScreen() {
   }, []);
 
   async function openForm() {
+    setEditTarget(null); // un seul formulaire à la fois (création/modification mutuellement exclusifs)
     setName("");
     setDescription("");
     setNameError(undefined);
     setSubmitError(undefined);
 
     try {
-      // Comptage frais au moment de l'ouverture (pas l'état React, potentiellement
-      // obsolète juste après un rechargement de page) pour une présélection correcte.
       const current = await listProjects();
       setProjects(current);
       setLoadError(false);
-      setSelectedColor(nextProjectColor(current.length));
       setFormOpen(true);
     } catch {
       setLoadError(true);
@@ -121,7 +109,7 @@ export function ProjectsScreen() {
     setPending(true);
 
     try {
-      await createProject({ name, description, color: selectedColor });
+      await createProject({ name, description });
     } catch {
       setSubmitError(SUBMIT_FAILED_MESSAGE);
       setPending(false);
@@ -213,12 +201,106 @@ export function ProjectsScreen() {
     }
   }
 
+  function openEdit(project: Project) {
+    setFormOpen(false); // un seul formulaire à la fois (création/modification mutuellement exclusifs)
+    setEditTarget(project);
+    setEditName(project.name);
+    setEditDescription(project.description);
+    setEditNameError(undefined);
+    setEditSubmitError(undefined);
+  }
+
+  function closeEdit() {
+    setEditTarget(null);
+    setEditNameError(undefined);
+    setEditSubmitError(undefined);
+  }
+
+  async function handleEditSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (editPending || !editTarget) {
+      return;
+    }
+
+    if (!validateProjectName(editName)) {
+      setEditNameError(NAME_REQUIRED_MESSAGE);
+      return;
+    }
+
+    setEditNameError(undefined);
+    setEditSubmitError(undefined);
+    setEditPending(true);
+
+    try {
+      await updateProject(editTarget.id, { name: editName, description: editDescription });
+    } catch {
+      setEditSubmitError(UPDATE_FAILED_MESSAGE);
+      setEditPending(false);
+      return;
+    }
+
+    closeEdit();
+    setEditPending(false);
+
+    try {
+      setProjects(await listProjects());
+      setLoadError(false);
+    } catch {
+      setLoadError(true);
+    }
+  }
+
+  function handleRequestDelete(project: Project) {
+    if (actionPendingId) {
+      return;
+    }
+    setDeleteError(undefined);
+    setDeleteTarget(project);
+  }
+
+  function handleCancelDelete() {
+    setDeleteTarget(null);
+  }
+
+  async function handleConfirmDelete() {
+    const project = deleteTarget;
+
+    if (!project || actionPendingId) {
+      return;
+    }
+
+    setDeleteError(undefined);
+    setActionPendingId(project.id);
+
+    try {
+      await deleteProject(project.id);
+    } catch {
+      setDeleteError(DELETE_FAILED_MESSAGE);
+      setActionPendingId(null);
+      setDeleteTarget(null);
+      return;
+    }
+
+    // La suppression a réussi : un échec du rechargement ci-dessous n'est pas un
+    // échec de la suppression (même pattern que handleSubmit / Story 2.2).
+    setActionPendingId(null);
+    setDeleteTarget(null);
+
+    try {
+      setProjects(await listProjects());
+      setLoadError(false);
+    } catch {
+      setLoadError(true);
+    }
+  }
+
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>Projets</h1>
 
       <div className={styles.headerActions}>
-        {!formOpen && (
+        {!formOpen && !editTarget && (
           <button
             className={styles.primaryButton}
             type="button"
@@ -292,29 +374,6 @@ export function ProjectsScreen() {
             />
           </div>
 
-          <fieldset className={styles.swatchFieldset}>
-            <legend className={styles.label}>Couleur</legend>
-            <div className={styles.swatches}>
-              {PROJECT_COLOR_ROTATION.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  className={styles.swatch}
-                  aria-pressed={selectedColor === color}
-                  aria-label={COLOR_LABELS[color]}
-                  data-selected={selectedColor === color}
-                  onClick={() => setSelectedColor(color)}
-                  disabled={pending}
-                >
-                  <span
-                    className={styles.swatchChip}
-                    style={{ backgroundColor: `var(--color-${color})` }}
-                  />
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
           {submitError && (
             <p className={styles.error} role="alert">
               {submitError}
@@ -341,6 +400,68 @@ export function ProjectsScreen() {
         </form>
       )}
 
+      {editTarget && (
+        <form className={styles.form} onSubmit={handleEditSubmit}>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="edit-project-name">
+              Nom
+            </label>
+            <input
+              className={styles.input}
+              id="edit-project-name"
+              name="name"
+              type="text"
+              value={editName}
+              onChange={(event) => setEditName(event.target.value)}
+              disabled={editPending}
+            />
+            {editNameError && (
+              <p className={styles.error} role="alert">
+                {editNameError}
+              </p>
+            )}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="edit-project-description">
+              Description
+            </label>
+            <textarea
+              className={styles.textarea}
+              id="edit-project-description"
+              name="description"
+              value={editDescription}
+              onChange={(event) => setEditDescription(event.target.value)}
+              disabled={editPending}
+            />
+          </div>
+
+          {editSubmitError && (
+            <p className={styles.error} role="alert">
+              {editSubmitError}
+            </p>
+          )}
+
+          <div className={styles.actions}>
+            <button
+              className={styles.ghostButton}
+              type="button"
+              onClick={closeEdit}
+              disabled={editPending}
+            >
+              Annuler
+            </button>
+            <button
+              className={styles.primaryButton}
+              type="submit"
+              disabled={editPending}
+            >
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      )}
+
       {!loading && active.length === 0 && archived.length === 0 && !loadError && (
         <p className={styles.empty}>{EMPTY_MESSAGE}</p>
       )}
@@ -355,6 +476,8 @@ export function ProjectsScreen() {
                 pending={actionPendingId === project.id}
                 onArchive={handleArchive}
                 onRequestUnarchive={handleRequestUnarchive}
+                onEdit={openEdit}
+                onRequestDelete={handleRequestDelete}
               />
             ))}
           </ul>
@@ -379,6 +502,12 @@ export function ProjectsScreen() {
         </p>
       )}
 
+      {deleteError && (
+        <p className={styles.error} role="alert">
+          {deleteError}
+        </p>
+      )}
+
       <ConfirmDialog
         open={confirmTarget !== null}
         title="Réactiver ce projet ?"
@@ -387,6 +516,22 @@ export function ProjectsScreen() {
         onConfirm={handleConfirmUnarchive}
         onCancel={handleCancelUnarchive}
         pending={confirmTarget !== null && actionPendingId === confirmTarget.id}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Supprimer définitivement ce projet ?"
+        description={
+          deleteTarget
+            ? `« ${deleteTarget.name} » ainsi que ses tâches, notes et documents seront supprimés définitivement. Cette action est irréversible.`
+            : undefined
+        }
+        confirmLabel="Supprimer définitivement"
+        cancelLabel="Annuler"
+        variant="destructive"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        pending={deleteTarget !== null && actionPendingId === deleteTarget.id}
       />
     </main>
   );
@@ -397,25 +542,32 @@ function ProjectRow({
   pending,
   onArchive,
   onRequestUnarchive,
+  onEdit,
+  onRequestDelete,
 }: {
   project: Project;
   pending: boolean;
   onArchive: (project: Project) => void;
   onRequestUnarchive: (project: Project) => void;
+  onEdit: (project: Project) => void;
+  onRequestDelete: (project: Project) => void;
 }) {
   return (
     <li className={styles.projectCard}>
-      <span
-        className={styles.projectSwatch}
-        style={{ backgroundColor: `var(--color-${project.color})` }}
-        aria-hidden="true"
-      />
       <Link href={`/projects/${project.id}`} className={styles.projectName}>
         {project.name}
       </Link>
       <span className={styles.statusPill} data-status={project.status}>
         {STATUS_LABELS[project.status]}
       </span>
+      <button
+        type="button"
+        className={styles.rowAction}
+        onClick={() => onEdit(project)}
+        disabled={pending}
+      >
+        Modifier
+      </button>
       {project.status === "active" ? (
         <button
           type="button"
@@ -426,14 +578,24 @@ function ProjectRow({
           Archiver
         </button>
       ) : (
-        <button
-          type="button"
-          className={styles.rowAction}
-          onClick={() => onRequestUnarchive(project)}
-          disabled={pending}
-        >
-          Désarchiver
-        </button>
+        <>
+          <button
+            type="button"
+            className={styles.rowAction}
+            onClick={() => onRequestUnarchive(project)}
+            disabled={pending}
+          >
+            Désarchiver
+          </button>
+          <button
+            type="button"
+            className={styles.deleteAction}
+            onClick={() => onRequestDelete(project)}
+            disabled={pending}
+          >
+            Supprimer définitivement
+          </button>
+        </>
       )}
     </li>
   );

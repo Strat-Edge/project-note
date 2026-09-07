@@ -9,8 +9,10 @@ export {
   getProject,
   archiveProject,
   unarchiveProject,
+  updateProject,
+  deleteProject,
 } from "./projects";
-export type { CreateProjectInput } from "./projects";
+export type { CreateProjectInput, UpdateProjectInput } from "./projects";
 export {
   createTask,
   listTasksByProject,

@@ -306,23 +306,13 @@ export function GeneralScreen() {
                         {dayTasks.length > 0 && (
                           <div className={styles.dots} aria-hidden="true">
                             {dayTasks.map((task) => (
-                              <span key={task.id} className={styles.dotGroup}>
-                                <i
-                                  className={styles.projectDot}
-                                  style={{
-                                    backgroundColor:
-                                      task.projectId !== null
-                                        ? `var(--color-${projectsById.get(task.projectId)?.color ?? "muted"})`
-                                        : "var(--color-muted)",
-                                  }}
-                                />
-                                <span
-                                  className={styles.priorityDot}
-                                  data-priority={task.priority}
-                                  title={`Priorité ${PRIORITY_LABELS[task.priority]}`}
-                                >
-                                  {PRIORITY_LETTERS[task.priority]}
-                                </span>
+                              <span
+                                key={task.id}
+                                className={styles.priorityDot}
+                                data-priority={task.priority}
+                                title={`Priorité ${PRIORITY_LABELS[task.priority]}`}
+                              >
+                                {PRIORITY_LETTERS[task.priority]}
                               </span>
                             ))}
                           </div>
@@ -381,11 +371,6 @@ function ProjectFilterControls({
             onChange={() => onToggleProject(project.id)}
           />
           <span className={styles.checkboxBox} aria-hidden="true" />
-          <span
-            className={styles.filterSwatch}
-            style={{ backgroundColor: `var(--color-${project.color})` }}
-            aria-hidden="true"
-          />
           {project.name}
         </label>
       ))}
@@ -459,12 +444,6 @@ function DayDetailPanel({
             const cells = (
               <>
                 <span className={styles.dayPanelCellProject} role="cell">
-                  <i
-                    style={{
-                      backgroundColor: project ? `var(--color-${project.color})` : "var(--color-muted)",
-                    }}
-                    aria-hidden="true"
-                  />
                   {project ? project.name : "Sans projet"}
                 </span>
                 <span className={styles.dayPanelCellTask} role="cell">

@@ -212,13 +212,6 @@
   }
 }
 
-.optionSwatch {
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-sm);
-}
-
 .field {
   display: flex;
   flex-direction: column;
