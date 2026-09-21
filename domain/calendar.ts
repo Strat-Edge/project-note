@@ -96,11 +96,19 @@ export function getMonthGridDays(monthDate: Date): Date[] {
 // défaut. Reçoit Project[] en plus de Task[] (toujours aucune dépendance IO, cf. AD-2) :
 // la distinction actif/archivé vit sur Project.status, pas sur Task — ce module doit donc
 // résoudre chaque task.projectId vers son Project pour appliquer le filtre.
+// Identifiant réservé de l'entrée de filtre « Hors projet » (les tâches générales,
+// projectId: null — FR-2). Ne peut jamais collisionner avec un id de projet réel : ceux-ci
+// sont des UUID (crypto.randomUUID, cf. data/local/projects.ts). Sert aussi de segment
+// d'URL au tableau de bord « Hors projet » (app/projects/hors-projet/) — une seule
+// constante pour le filtre et la route, pour qu'ils ne puissent pas diverger.
+export const NO_PROJECT_FILTER_ID = "hors-projet";
+
 export interface CalendarFilters {
-  // Vide = aucun filtre actif : toutes les tâches de projets actifs sont affichées (AC#2,
-  // comportement par défaut). Non vide = "seules les tâches de ces projets restent
-  // affichées" (AC#1, texte exact de l'AC) : les tâches sans projet et les tâches d'un
-  // projet actif non sélectionné sont exclues tant qu'un filtre est actif.
+  // Vide = aucun filtre actif : toutes les tâches de projets actifs, plus les tâches
+  // générales, sont affichées (AC#2, comportement par défaut). Non vide = "seules les
+  // tâches de ces projets restent affichées" (AC#1) — où « ces projets » inclut désormais
+  // l'entrée réservée NO_PROJECT_FILTER_ID, cochable comme n'importe quel projet réel.
+  // Les tâches d'un projet actif non sélectionné restent exclues tant qu'un filtre est actif.
   selectedProjectIds: ReadonlySet<string>;
   // FR-31 : false par défaut, les tâches de projets archivés n'apparaissent jamais
   // (AC#2). AC#3 : ce booléen est indépendant de selectedProjectIds — la liste de
@@ -123,10 +131,19 @@ export function filterTasksForCalendar(
 
   return tasks.filter((task) => {
     if (task.projectId === null) {
-      // Tâche générale (FR-2) : visible seulement en l'absence de filtre projet actif —
-      // une sélection explicite de projets signifie littéralement "seules les tâches de
-      // CES projets" (AC#1), une tâche sans aucun projet n'en fait jamais partie.
-      return !hasProjectFilter;
+      // Tâche générale (FR-2) : « Hors projet » est une entrée de filtre à part entière
+      // (NO_PROJECT_FILTER_ID), au même titre qu'un projet réel — visible en l'absence de
+      // filtre, ou dès que cette entrée est explicitement cochée.
+      //
+      // Révise la décision de conception de la Story 4.2 ("tâche Sans projet masquée dès
+      // qu'un filtre actif est appliqué", confirmée par Guillaume le 2026-08-19) : cette
+      // lecture littérale de l'AC#1 rendait la tâche générale introuvable dès qu'un filtre
+      // était actif, alors qu'aucun écran ne permettait de la retrouver par ailleurs. Les
+      // Dev Notes de la Story 4.2 prévoyaient ce réajustement ("si Guillaume juge ce
+      // comportement contre-intuitif en usage réel, ajuster filterTasksForCalendar —
+      // documenter le changement s'il a lieu") : fait ici, en même temps que la surface
+      // « Hors projet » qui donne enfin une destination à ces tâches.
+      return !hasProjectFilter || filters.selectedProjectIds.has(NO_PROJECT_FILTER_ID);
     }
 
     const project = projectsById.get(task.projectId);

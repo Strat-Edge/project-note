@@ -5,6 +5,7 @@ import Link from "next/link";
 import { liveQuery } from "dexie";
 import type { CalendarFilters, CalendarViewMode, Priority, Project, Task, TaskStatus } from "@/domain";
 import {
+  NO_PROJECT_FILTER_ID,
   dateKey,
   filterTasksForCalendar,
   getMonthGridDays,
@@ -16,6 +17,11 @@ import {
 } from "@/domain";
 import { listAllTasks, listProjects } from "@/data/local";
 import styles from "./general-screen.module.css";
+
+// Nom de l'entrée « Hors projet », partagé par la colonne Projet du tableau du jour et la
+// case du filtre — mêmes mots que l'entrée épinglée de la liste des projets
+// (projects-screen.tsx) et que le titre de son tableau de bord (project-view.tsx).
+const GENERAL_PROJECT_NAME = "Hors projet";
 
 const WEEKDAY_LABELS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const WEEKDAY_LETTERS = ["L", "M", "M", "J", "V", "S", "D"];
@@ -169,13 +175,25 @@ export function GeneralScreen() {
   // mutation de l'état `selectedProjectIds` lui-même — l'id périmé redevient actif de lui-même
   // si le projet est désarchivé (Story 2.3).
   const activeProjectIds = new Set(activeProjects.map((project) => project.id));
+  // NO_PROJECT_FILTER_ID doit traverser cette réconciliation : il ne correspond à aucun
+  // Project, il serait donc systématiquement écarté par le filtre ci-dessous — la case
+  // « Hors projet » apparaîtrait cochée sans jamais rien filtrer. Il n'a par ailleurs aucun
+  // statut actif/archivé à réconcilier, l'entrée n'existant pas en base.
   const effectiveSelectedProjectIds = new Set(
-    [...selectedProjectIds].filter((id) => activeProjectIds.has(id)),
+    [...selectedProjectIds].filter(
+      (id) => id === NO_PROJECT_FILTER_ID || activeProjectIds.has(id),
+    ),
   );
   const filters: CalendarFilters = {
     selectedProjectIds: effectiveSelectedProjectIds,
     showArchivedProjects: false,
   };
+  // La case « Hors projet » n'est proposée que s'il existe au moins une tâche générale :
+  // une case qui ne filtrerait rien n'aurait aucun effet observable. Dérivé de `tasks`, déjà
+  // chargé — aucune requête supplémentaire. Volontairement différent de l'entrée épinglée de
+  // la liste des projets, elle toujours visible : là-bas c'est une destination à retrouver,
+  // ici un simple contrôle de filtrage.
+  const hasGeneralTasks = tasks.some((task) => task.projectId === null);
   const visibleTasks = filterTasksForCalendar(tasks, projects, filters);
   const projectsById = new Map(projects.map((project) => [project.id, project]));
   const tasksByDate = groupTasksByDueDate(visibleTasks);
@@ -248,9 +266,10 @@ export function GeneralScreen() {
         </p>
       ) : (
         <>
-          {activeProjects.length > 0 && (
+          {(activeProjects.length > 0 || hasGeneralTasks) && (
             <ProjectFilterControls
               activeProjects={activeProjects}
+              showGeneralFilter={hasGeneralTasks}
               selectedProjectIds={selectedProjectIds}
               onToggleProject={toggleProjectFilter}
             />
@@ -358,10 +377,12 @@ export function GeneralScreen() {
 // composant Checkbox partagé n'existe encore dans ce projet (cf. Dev Notes de la story).
 function ProjectFilterControls({
   activeProjects,
+  showGeneralFilter,
   selectedProjectIds,
   onToggleProject,
 }: {
   activeProjects: Project[];
+  showGeneralFilter: boolean;
   selectedProjectIds: ReadonlySet<string>;
   onToggleProject: (id: string) => void;
 }) {
@@ -371,6 +392,22 @@ function ProjectFilterControls({
       role="group"
       aria-label="Filtrer le calendrier"
     >
+      {/* « Hors projet » en première case, comme en première ligne de la liste des projets.
+          Cochable au même titre qu'un projet réel depuis la révision du comportement décrit
+          dans domain/calendar.ts — auparavant les tâches générales disparaissaient dès
+          qu'un filtre quelconque était actif, sans aucun moyen de les rappeler. */}
+      {showGeneralFilter && (
+        <label className={styles.filter}>
+          <input
+            type="checkbox"
+            className={styles.checkboxInput}
+            checked={selectedProjectIds.has(NO_PROJECT_FILTER_ID)}
+            onChange={() => onToggleProject(NO_PROJECT_FILTER_ID)}
+          />
+          <span className={styles.checkboxBox} aria-hidden="true" />
+          {GENERAL_PROJECT_NAME}
+        </label>
+      )}
       {activeProjects.map((project) => (
         <label key={project.id} className={styles.filter}>
           <input
@@ -461,7 +498,7 @@ function DayDetailPanel({
             const cells = (
               <>
                 <span className={styles.dayPanelCellProject} role="cell">
-                  {project ? project.name : "Sans projet"}
+                  {project ? project.name : GENERAL_PROJECT_NAME}
                 </span>
                 <span className={styles.dayPanelCellTask} role="cell">
                   <span
@@ -499,21 +536,18 @@ function DayDetailPanel({
 
             // Ligne entière cliquable (retour Guillaume, tour précédent : "qu'on puisse
             // directement faire des liens pour gagner du temps") — pas seulement le nom du
-            // projet. Sans projet, la tâche n'existe nulle part ailleurs que le calendrier :
-            // aucune destination possible, la ligne reste statique.
-            return project ? (
+            // projet. Une tâche sans projet mène désormais au tableau de bord « Hors
+            // projet » : plus aucune ligne statique ici, c'était l'impasse signalée par
+            // Guillaume ("comment je trouve la tâche ? je ne peux pas retourner dessus").
+            return (
               <Link
                 key={task.id}
-                href={`/projects/${project.id}`}
+                href={project ? `/projects/${project.id}` : `/projects/${NO_PROJECT_FILTER_ID}`}
                 className={styles.dayPanelRow}
                 role="row"
               >
                 {cells}
               </Link>
-            ) : (
-              <span key={task.id} className={styles.dayPanelRow} role="row" data-static="true">
-                {cells}
-              </span>
             );
           })}
         </div>
@@ -573,7 +607,9 @@ function formatCellLabel(day: Date, dayTasks: Task[], projectsById: Map<string, 
   }
   const details = dayTasks
     .map((task) => {
-      const projectName = task.projectId ? (projectsById.get(task.projectId)?.name ?? "Sans projet") : "Sans projet";
+      const projectName = task.projectId
+        ? (projectsById.get(task.projectId)?.name ?? GENERAL_PROJECT_NAME)
+        : GENERAL_PROJECT_NAME;
       return `${projectName}, priorité ${PRIORITY_LABELS[task.priority]}`;
     })
     .join(" ; ");

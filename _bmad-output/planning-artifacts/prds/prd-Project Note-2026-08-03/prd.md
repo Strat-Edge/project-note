@@ -81,6 +81,12 @@ L'utilisateur doit choisir un projet existant avant de saisir une Note ou un Doc
 - Impossible de valider une Note ou un Document sans projet sélectionné
 - Une Tâche sans projet est acceptée et classée comme tâche générale
 - La liste de sélection affiche les projets actifs en premier
+- Les tâches générales sont regroupées sous une entrée « Hors projet », épinglée en première ligne de la liste des projets et toujours présente, même sans aucune tâche générale
+- Le tableau de bord « Hors projet » n'affiche que des tâches : ni Notes ni Documents, qui exigent tous deux un projet réel (cf. ci-dessus)
+- « Hors projet » est une entrée virtuelle : aucun projet de ce nom n'existe en base, elle ne peut être ni renommée, ni archivée, ni supprimée, et n'entre pas dans le compteur "Actifs (n)"
+- Les tâches d'un projet supprimé définitivement basculent dans « Hors projet » plutôt que d'être supprimées avec lui — elles y restent donc consultables et modifiables
+
+**Notes:** Avant l'introduction de « Hors projet », une tâche générale n'était atteignable nulle part dans l'app : le calendrier général l'affichait si (et seulement si) elle portait une échéance, sans lien cliquable, et aucune vue projet ne peut la contenir par construction. Une tâche générale sans échéance était donc totalement invisible, y compris celles issues d'une suppression définitive de projet.
 
 #### FR-3: Sélection de la priorité
 
@@ -274,7 +280,13 @@ L'utilisateur bascule entre une vue mensuelle et une vue hebdomadaire.
 
 #### FR-28: Filtre multi-projet
 
-L'utilisateur sélectionne un ou plusieurs projets pour filtrer les tâches affichées.
+L'utilisateur sélectionne un ou plusieurs projets pour filtrer les tâches affichées. L'entrée « Hors projet » (tâches générales, cf. FR-2) est cochable au même titre qu'un projet réel.
+
+**Consequences (testable):**
+- Sans aucune sélection, les tâches des projets actifs et les tâches générales sont toutes affichées
+- Une sélection de projets exclut les tâches générales tant que « Hors projet » n'est pas coché ; cocher « Hors projet » les ramène, en combinaison additive avec les projets sélectionnés
+- La case « Hors projet » n'est proposée que s'il existe au moins une tâche générale — une case sans effet observable n'est pas affichée
+- Dans le tableau du jour, une tâche générale est cliquable et mène au tableau de bord « Hors projet », comme une tâche de projet mène à son projet (cf. FR-30)
 
 #### FR-29: Code couleur par projet
 

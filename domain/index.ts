@@ -48,6 +48,7 @@ export {
 } from "./document";
 export type { Document } from "./document";
 export {
+  NO_PROJECT_FILTER_ID,
   dateKey,
   isSameDay,
   tasksWithDueDate,

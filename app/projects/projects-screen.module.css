@@ -139,6 +139,20 @@
   }
 }
 
+/* Entrée épinglée « Hors projet » : bordure en tirets et pas d'ombre, pour la distinguer
+   d'un vrai projet sans recourir à une couleur (les couleurs de projet ont été retirées,
+   cf. commit bae4a9e) — elle n'a ni statut, ni actions, et n'existe pas en base. */
+.projectCard[data-pinned="true"] {
+  border-style: dashed;
+  box-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .projectCard[data-pinned="true"] {
+    box-shadow: none;
+  }
+}
+
 .projectName {
   flex: 1;
   font-size: var(--font-body-size);

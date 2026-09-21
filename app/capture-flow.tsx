@@ -842,8 +842,12 @@ export function CaptureFlow() {
                     </div>
                   )}
 
+                  {/* Mêmes mots que la destination où la tâche sera retrouvée ensuite —
+                      entrée épinglée « Hors projet » de la liste des projets et titre de son
+                      tableau de bord. Anciennement "Sans projet (tâche uniquement)" : le
+                      choix et le lieu portent désormais le même nom. */}
                   <OptionButton
-                    label="Sans projet (tâche uniquement)"
+                    label="Hors projet (tâche uniquement)"
                     selected={projectSelection === "none"}
                     onClick={() => selectProject("none")}
                   />

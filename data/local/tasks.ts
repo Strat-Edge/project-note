@@ -110,6 +110,19 @@ export async function listAllTasks(): Promise<Task[]> {
   return db.tasks.toArray();
 }
 
+// Tableau de bord « Hors projet » (app/projects/hors-projet/) — les seules tâches générales
+// (projectId: null, FR-2), à l'exclusion de toute tâche rattachée à un projet. Pendant exact
+// de listTasksByProject ci-dessus pour le pseudo-projet.
+//
+// `filter()` (scan complet en mémoire) plutôt qu'une requête sur l'index `projectId` : même
+// raison que listAllTasks ci-dessus — IndexedDB n'indexe pas les valeurs `null`, une entrée
+// à projectId: null est purement absente de cet index, donc `.where("projectId")` ne peut
+// structurellement pas les retrouver. Taille de table compatible avec un scan complet
+// (outil interne solo, même précédent que listProjects()/listAllTasks()).
+export async function listGeneralTasks(): Promise<Task[]> {
+  return db.tasks.filter((task) => task.projectId === null).toArray();
+}
+
 async function getTaskOrThrow(id: string): Promise<Task> {
   const task = await db.tasks.get(id);
   if (!task) {

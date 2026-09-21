@@ -17,6 +17,7 @@ export {
   createTask,
   listTasksByProject,
   listAllTasks,
+  listGeneralTasks,
   markTaskOpened,
   updateTaskStatus,
   updateTaskPriority,

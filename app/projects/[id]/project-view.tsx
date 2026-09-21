@@ -1,6 +1,8 @@
 "use client";
 
-// app/projects/[id]/project-view.tsx — vue projet (FR-22 à FR-26). Vit sous app/ (pas
+// app/projects/[id]/project-view.tsx — vue projet (FR-22 à FR-26). Sert aussi de tableau
+// de bord « Hors projet » quand `projectId` vaut null (route app/projects/hors-projet/) :
+// même écran, sections Notes/Documents retirées — cf. commentaire de ProjectView. Vit sous app/ (pas
 // components/) car il importe data/local/ directement (AD-2, même précédent que
 // app/projects/projects-screen.tsx / app/capture-flow.tsx). TaskCard/TaskDetail/NoteCard/
 // NoteDetail/DocumentCard/DocumentDetail/Tabs restent des sous-composants internes à ce
@@ -26,6 +28,7 @@ import {
   listDocumentsByProject,
   listNotesByProject,
   listTasksByProject,
+  listGeneralTasks,
   markDocumentOpened,
   markNoteOpened,
   markTaskOpened,
@@ -84,6 +87,12 @@ const EMPTY_NOTES_MESSAGE =
   "Aucune note pour l'instant. Touchez + pour en créer une.";
 const EMPTY_DOCUMENTS_MESSAGE =
   "Aucun document pour l'instant. Touchez + pour en créer un.";
+// Pseudo-projet « Hors projet » (entrée virtuelle, aucune ligne Project en base).
+const GENERAL_TITLE = "Hors projet";
+const GENERAL_SUBTITLE =
+  "Les tâches rattachées à aucun projet, avec ou sans échéance.";
+const EMPTY_GENERAL_TASKS_MESSAGE =
+  "Aucune tâche hors projet. Les tâches créées sans projet, et celles d'un projet supprimé, arrivent ici.";
 const PROJECT_NOT_FOUND_MESSAGE = "Projet introuvable.";
 const PROJECT_LOAD_ERROR_MESSAGE = "Impossible de charger le projet.";
 const TASKS_LOAD_ERROR_MESSAGE = "Impossible de charger les tâches.";
@@ -171,7 +180,15 @@ function documentPreviewKind(mimeType: string): DocumentPreviewKind {
   return "none";
 }
 
-export function ProjectView({ projectId }: { projectId: string }) {
+// `projectId: null` = tableau de bord « Hors projet » (pseudo-projet, cf. app/projects/
+// hors-projet/page.tsx) : aucun Project n'est chargé — l'entrée est virtuelle, sa vérité de
+// stockage reste `projectId: null` sur les tâches elles-mêmes — la liste vient de
+// listGeneralTasks(), et les sections Notes/Documents ne sont ni chargées ni affichées.
+// FR-2 exige un projet réel pour une Note comme pour un Document (Note.projectId et
+// Document.projectId sont `string`, jamais null) : il ne peut structurellement rien y avoir
+// à montrer dans ces deux sections ici, ce n'est pas un choix d'affichage.
+export function ProjectView({ projectId }: { projectId: string | null }) {
+  const isGeneral = projectId === null;
   const [project, setProject] = useState<Project | null>(null);
   const [projectNotFound, setProjectNotFound] = useState(false);
   const [projectLoadError, setProjectLoadError] = useState(false);
@@ -224,6 +241,15 @@ export function ProjectView({ projectId }: { projectId: string }) {
       setSelectedDocumentId(null);
       setSortFilters({ chronological: true, priority: false });
 
+      // « Hors projet » : rien à charger, aucune ligne Project n'existe en base. Test sur
+      // `projectId` directement (pas sur `isGeneral`, dérivé) pour garder cet effet sur la
+      // seule dépendance [projectId] — les deux sont équivalents par construction.
+      if (projectId === null) {
+        setProject(null);
+        setLoading(false);
+        return;
+      }
+
       const projectResult = await getProject(projectId).catch(() => "error" as const);
       if (cancelled) return;
 
@@ -254,7 +280,9 @@ export function ProjectView({ projectId }: { projectId: string }) {
   // qu'avant cette story) — l'affichage reste conditionné à `loading`/`projectNotFound`/
   // `projectLoadError` au rendu.
   useEffect(() => {
-    const subscription = liveQuery(() => listTasksByProject(projectId)).subscribe({
+    const subscription = liveQuery(() =>
+      projectId === null ? listGeneralTasks() : listTasksByProject(projectId),
+    ).subscribe({
       // `setTasksLoadError(false)` ici (pas au corps de l'effet) : un `setState` synchrone
       // au corps d'un effet déclenche des rendus en cascade évitables (règle
       // react-hooks/set-state-in-effect) — la première émission de `next` (immédiate à
@@ -273,6 +301,12 @@ export function ProjectView({ projectId }: { projectId: string }) {
   // arrière-plan qui insère une note créée sur un autre appareil pendant que cette vue
   // reste montée.
   useEffect(() => {
+    if (projectId === null) {
+      // « Hors projet » n'a pas de section Notes (cf. commentaire de ProjectView) : aucun
+      // abonnement à ouvrir, et `notes` reste son tableau vide initial.
+      return;
+    }
+
     const subscription = liveQuery(() => listNotesByProject(projectId)).subscribe({
       next: (result) => {
         setNotesLoadError(false);
@@ -288,6 +322,11 @@ export function ProjectView({ projectId }: { projectId: string }) {
   // en arrière-plan qui insère un document créé sur un autre appareil pendant que cette vue
   // reste montée.
   useEffect(() => {
+    if (projectId === null) {
+      // Même rationale que l'abonnement notes ci-dessus.
+      return;
+    }
+
     const subscription = liveQuery(() => listDocumentsByProject(projectId)).subscribe({
       next: (result) => {
         setDocumentsLoadError(false);
@@ -434,27 +473,37 @@ export function ProjectView({ projectId }: { projectId: string }) {
     );
   }
 
-  if (loading || !project) {
+  // `!project` ne peut pas servir de garde en mode « Hors projet » : aucun Project n'y est
+  // jamais chargé, la vue resterait vide indéfiniment.
+  if (loading || (!isGeneral && !project)) {
     return <main className={styles.main} />;
   }
 
   return (
     <main className={styles.main}>
       <div className={styles.header}>
-        <h1 className={styles.title}>{project.name}</h1>
-        {project.status === "archived" && (
+        <h1 className={styles.title}>{project ? project.name : GENERAL_TITLE}</h1>
+        {project && project.status === "archived" && (
           <span className={styles.statusPill}>
             {STATUS_LABELS[project.status]}
           </span>
         )}
       </div>
 
+      {isGeneral && <p className={styles.generalSubtitle}>{GENERAL_SUBTITLE}</p>}
+
       {/* Fiche projet unifiée (retour Guillaume, remplace les 3 gros onglets Tâches/
           Documents/Notes — "ça fait des boutons qui font limite un tiers de la page") : les
           3 sections restent toutes visibles en permanence, chacune scrollable en interne
           (cf. .sectionScroll ci-dessous) plutôt que de masquer les 2/3 du contenu derrière un
           clic d'onglet. */}
-      <div className={styles.contentGrid}>
+      <div
+        className={
+          isGeneral
+            ? `${styles.contentGrid} ${styles.contentGridTasksOnly}`
+            : styles.contentGrid
+        }
+      >
         <section
           className={`${styles.moduleSection} ${styles.tasksSection}`}
           aria-labelledby="section-tasks-title"
@@ -474,7 +523,9 @@ export function ProjectView({ projectId }: { projectId: string }) {
                   onChange={setSortFilters}
                 />
                 {tasks.length === 0 ? (
-                  <p className={styles.empty}>{EMPTY_TASKS_MESSAGE}</p>
+                  <p className={styles.empty}>
+                    {isGeneral ? EMPTY_GENERAL_TASKS_MESSAGE : EMPTY_TASKS_MESSAGE}
+                  </p>
                 ) : (
                   <ul className={styles.taskList}>
                     {sortTasks(tasks, sortFilters).map((task) => (
@@ -492,67 +543,71 @@ export function ProjectView({ projectId }: { projectId: string }) {
           </div>
         </section>
 
-        <section
-          className={`${styles.moduleSection} ${styles.notesSection}`}
-          aria-labelledby="section-notes-title"
-        >
-          <h2 id="section-notes-title" className={styles.sectionTitle}>
-            Notes
-          </h2>
-          <div className={styles.sectionScroll}>
-            {notesLoadError ? (
-              <p className={styles.error} role="alert">
-                {NOTES_LOAD_ERROR_MESSAGE}
-              </p>
-            ) : notes.length === 0 ? (
-              <p className={styles.empty}>{EMPTY_NOTES_MESSAGE}</p>
-            ) : (
-              <ul className={styles.taskList}>
-                {sortNotes(notes).map((note) => (
-                  <NoteCard key={note.id} note={note} onOpen={handleOpenNote} />
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
+        {!isGeneral && (
+          <section
+            className={`${styles.moduleSection} ${styles.notesSection}`}
+            aria-labelledby="section-notes-title"
+          >
+            <h2 id="section-notes-title" className={styles.sectionTitle}>
+              Notes
+            </h2>
+            <div className={styles.sectionScroll}>
+              {notesLoadError ? (
+                <p className={styles.error} role="alert">
+                  {NOTES_LOAD_ERROR_MESSAGE}
+                </p>
+              ) : notes.length === 0 ? (
+                <p className={styles.empty}>{EMPTY_NOTES_MESSAGE}</p>
+              ) : (
+                <ul className={styles.taskList}>
+                  {sortNotes(notes).map((note) => (
+                    <NoteCard key={note.id} note={note} onOpen={handleOpenNote} />
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+        )}
 
-        <section
-          className={`${styles.moduleSection} ${styles.documentsSection}`}
-          aria-labelledby="section-documents-title"
-        >
-          <h2 id="section-documents-title" className={styles.sectionTitle}>
-            Documents
-          </h2>
-          <div className={styles.sectionScroll}>
-            {documentsLoadError ? (
-              <p className={styles.error} role="alert">
-                {DOCUMENTS_LOAD_ERROR_MESSAGE}
-              </p>
-            ) : (
-              <>
-                {documentActionError && (
-                  <p className={styles.error} role="alert">
-                    {documentActionError}
-                  </p>
-                )}
-                {documents.length === 0 ? (
-                  <p className={styles.empty}>{EMPTY_DOCUMENTS_MESSAGE}</p>
-                ) : (
-                  <ul className={styles.taskList}>
-                    {sortDocuments(documents).map((documentItem) => (
-                      <DocumentCard
-                        key={documentItem.id}
-                        documentItem={documentItem}
-                        onOpen={handleOpenDocument}
-                        onDelete={handleRequestDeleteDocument}
-                      />
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-          </div>
-        </section>
+        {!isGeneral && (
+          <section
+            className={`${styles.moduleSection} ${styles.documentsSection}`}
+            aria-labelledby="section-documents-title"
+          >
+            <h2 id="section-documents-title" className={styles.sectionTitle}>
+              Documents
+            </h2>
+            <div className={styles.sectionScroll}>
+              {documentsLoadError ? (
+                <p className={styles.error} role="alert">
+                  {DOCUMENTS_LOAD_ERROR_MESSAGE}
+                </p>
+              ) : (
+                <>
+                  {documentActionError && (
+                    <p className={styles.error} role="alert">
+                      {documentActionError}
+                    </p>
+                  )}
+                  {documents.length === 0 ? (
+                    <p className={styles.empty}>{EMPTY_DOCUMENTS_MESSAGE}</p>
+                  ) : (
+                    <ul className={styles.taskList}>
+                      {sortDocuments(documents).map((documentItem) => (
+                        <DocumentCard
+                          key={documentItem.id}
+                          documentItem={documentItem}
+                          onOpen={handleOpenDocument}
+                          onDelete={handleRequestDeleteDocument}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+            </div>
+          </section>
+        )}
       </div>
 
       <TaskDetail

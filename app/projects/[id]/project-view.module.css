@@ -36,6 +36,18 @@
   }
 }
 
+/* Légende du tableau de bord « Hors projet » — même traitement que .subtitle du calendrier
+   général (general-screen.module.css). Aucune redéfinition sombre nécessaire :
+   --color-muted bascule déjà seul sous prefers-color-scheme: dark (globals.css). */
+.generalSubtitle {
+  /* .main est un flex column à gap var(--space-5) : sans cette compensation, la légende se
+     détacherait du titre au lieu de lui rester accrochée dessous. */
+  margin-top: calc(4px - var(--space-5));
+  font-size: var(--font-caption-size);
+  font-weight: var(--font-caption-weight);
+  color: var(--color-muted);
+}
+
 /* Fiche projet unifiée (retour Guillaume, remplace l'ancien sélecteur d'onglets Tâches/
    Documents/Notes) : Tâches en haut à gauche, Notes en haut à droite, Documents pleine
    largeur en dessous, en une seule colonne empilée sous 768px (pas la place pour 2 colonnes
@@ -54,6 +66,27 @@
     grid-template-columns: 1fr 1fr;
     grid-template-areas: "tasks notes" "documents documents";
   }
+}
+
+/* Tableau de bord « Hors projet » : la section Tâches est seule (FR-2 interdit Note et
+   Document sans projet réel) — une seule zone, y compris au-delà de 768px où la grille
+   passerait sinon à 2 colonnes dont une vide. Déclaré APRÈS la media query de .contentGrid
+   ci-dessus : à spécificité égale (une classe), c'est l'ordre source qui tranche. */
+.contentGridTasksOnly {
+  grid-template-areas: "tasks";
+}
+
+@media (min-width: 768px) {
+  .contentGridTasksOnly {
+    grid-template-columns: 1fr;
+    grid-template-areas: "tasks";
+  }
+}
+
+/* Seule section de la page : elle récupère la hauteur que Notes/Documents n'occupent plus
+   (0,2,0 de spécificité, donc l'emporte sur .sectionScroll seul). */
+.contentGridTasksOnly .sectionScroll {
+  max-height: 68vh;
 }
 
 /* Encadré visuel par module (retour Guillaume : "il faudrait faire des encadrés qu'on

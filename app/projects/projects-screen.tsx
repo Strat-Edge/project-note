@@ -2,12 +2,19 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { groupProjectsByStatus, validateProjectName, type Project } from "@/domain";
+import { liveQuery } from "dexie";
+import {
+  NO_PROJECT_FILTER_ID,
+  groupProjectsByStatus,
+  validateProjectName,
+  type Project,
+} from "@/domain";
 import {
   createProject,
   updateProject,
   deleteProject,
   listProjects,
+  listGeneralTasks,
   archiveProject,
   unarchiveProject,
 } from "@/data/local";
@@ -23,6 +30,7 @@ const UPDATE_FAILED_MESSAGE = "La modification a échoué. Réessayez.";
 const DELETE_FAILED_MESSAGE = "La suppression a échoué. Réessayez.";
 const EMPTY_MESSAGE =
   "Aucun projet pour l'instant. Cliquez sur « Nouveau projet » pour en créer un.";
+const GENERAL_PROJECT_NAME = "Hors projet";
 
 const STATUS_LABELS: Record<Project["status"], string> = {
   active: "Actif",
@@ -43,6 +51,9 @@ export function ProjectsScreen() {
   const [actionError, setActionError] = useState<string | undefined>();
   const [confirmTarget, setConfirmTarget] = useState<Project | null>(null);
   const [statusFilter, setStatusFilter] = useState<Project["status"]>("active");
+  // Nombre de tâches générales, affiché sur l'entrée épinglée « Hors projet ». `null` = pas
+  // encore connu (premier rendu), distinct de 0 : évite d'annoncer "0 tâche" avant de savoir.
+  const [generalTaskCount, setGeneralTaskCount] = useState<number | null>(null);
 
   const [editTarget, setEditTarget] = useState<Project | null>(null);
   const [editName, setEditName] = useState("");
@@ -55,7 +66,6 @@ export function ProjectsScreen() {
   const [deleteError, setDeleteError] = useState<string | undefined>();
 
   const { active, archived } = groupProjectsByStatus(projects);
-  const visibleProjects = statusFilter === "active" ? active : archived;
 
   useEffect(() => {
     listProjects()
@@ -65,6 +75,22 @@ export function ProjectsScreen() {
       })
       .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
+  }, []);
+
+  // liveQuery plutôt qu'un chargement ponctuel comme pour `projects` ci-dessus : ce compteur
+  // change sans passer par cet écran — une capture de tâche sans projet depuis le flux "+",
+  // un pull de synchro en arrière-plan, ou une suppression définitive de projet qui reverse
+  // ses tâches en projectId: null (data/local/projects.ts). Le recâbler à la main sur chacun
+  // de ces chemins serait à la fois plus verbeux et plus facile à oublier.
+  useEffect(() => {
+    const subscription = liveQuery(() => listGeneralTasks()).subscribe({
+      next: (result) => setGeneralTaskCount(result.length),
+      // Échec silencieux assumé : l'entrée « Hors projet » reste affichée sans son compteur
+      // (elle est toujours atteignable), un échec de comptage ne doit pas masquer la liste
+      // des projets ni afficher une erreur qui ne concerne pas les projets.
+      error: () => setGeneralTaskCount(null),
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   async function openForm() {
@@ -466,10 +492,33 @@ export function ProjectsScreen() {
         <p className={styles.empty}>{EMPTY_MESSAGE}</p>
       )}
 
-      {(active.length > 0 || archived.length > 0) && (
-        visibleProjects.length > 0 ? (
+      {/* Onglet Actifs — « Hors projet » y est épinglé en première ligne et toujours présent,
+          même sans aucune tâche générale et même sans aucun projet réel (choix de Guillaume :
+          "toujours actif, en en-tête de projet, première ligne"). Rendu ici plutôt que
+          concaténé à `active` : ce n'est pas un Project, il n'a ni statut, ni actions de
+          ligne, et il ne doit jamais entrer dans les compteurs "Actifs (n)". Absent de
+          l'onglet Archivés — l'entrée n'est pas archivable, elle n'y aurait aucun sens. */}
+      {statusFilter === "active" && (
+        <ul className={styles.projectList}>
+          <GeneralProjectRow taskCount={generalTaskCount} />
+          {active.map((project) => (
+            <ProjectRow
+              key={project.id}
+              project={project}
+              pending={actionPendingId === project.id}
+              onArchive={handleArchive}
+              onRequestUnarchive={handleRequestUnarchive}
+              onEdit={openEdit}
+              onRequestDelete={handleRequestDelete}
+            />
+          ))}
+        </ul>
+      )}
+
+      {statusFilter === "archived" &&
+        (archived.length > 0 ? (
           <ul className={styles.projectList}>
-            {visibleProjects.map((project) => (
+            {archived.map((project) => (
               <ProjectRow
                 key={project.id}
                 project={project}
@@ -482,13 +531,8 @@ export function ProjectsScreen() {
             ))}
           </ul>
         ) : (
-          <p className={styles.empty}>
-            {statusFilter === "active"
-              ? "Aucun projet actif."
-              : "Aucun projet archivé."}
-          </p>
-        )
-      )}
+          <p className={styles.empty}>Aucun projet archivé.</p>
+        ))}
 
       {loadError && (
         <p className={styles.error} role="alert">
@@ -523,7 +567,7 @@ export function ProjectsScreen() {
         title="Supprimer définitivement ce projet ?"
         description={
           deleteTarget
-            ? `« ${deleteTarget.name} » ainsi que ses tâches, notes et documents seront supprimés définitivement. Cette action est irréversible.`
+            ? `« ${deleteTarget.name} » sera supprimé définitivement, avec ses notes et ses documents. Ses tâches sont conservées et basculent dans « Hors projet ». Cette action est irréversible.`
             : undefined
         }
         confirmLabel="Supprimer définitivement"
@@ -534,6 +578,25 @@ export function ProjectsScreen() {
         pending={deleteTarget !== null && actionPendingId === deleteTarget.id}
       />
     </main>
+  );
+}
+
+// Entrée virtuelle « Hors projet » en tête de la liste (cf. app/projects/hors-projet/
+// page.tsx). Volontairement dépourvue des actions Modifier/Archiver/Supprimer : elle
+// n'existe pas en base, il n'y a donc rien à renommer, archiver ni supprimer — c'est ce qui
+// la rend fiable comme point de chute des tâches sans projet.
+function GeneralProjectRow({ taskCount }: { taskCount: number | null }) {
+  return (
+    <li className={styles.projectCard} data-pinned="true">
+      <Link href={`/projects/${NO_PROJECT_FILTER_ID}`} className={styles.projectName}>
+        {GENERAL_PROJECT_NAME}
+      </Link>
+      {taskCount !== null && (
+        <span className={styles.statusPill}>
+          {taskCount === 0 ? "Aucune tâche" : `${taskCount} tâche${taskCount > 1 ? "s" : ""}`}
+        </span>
+      )}
+    </li>
   );
 }
 
