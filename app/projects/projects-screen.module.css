@@ -139,18 +139,17 @@
   }
 }
 
-/* Entrée épinglée « Hors projet » : bordure en tirets et pas d'ombre, pour la distinguer
-   d'un vrai projet sans recourir à une couleur (les couleurs de projet ont été retirées,
-   cf. commit bae4a9e) — elle n'a ni statut, ni actions, et n'existe pas en base. */
-.projectCard[data-pinned="true"] {
-  border-style: dashed;
-  box-shadow: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .projectCard[data-pinned="true"] {
-    box-shadow: none;
-  }
+/* Entrée épinglée « Hors projet » : AUCUNE distinction visuelle avec un vrai projet (retour
+   Guillaume : "je ne veux pas de distinction entre le hors projet et les autres") — elle
+   hérite donc de .projectCard tel quel, bordure pleine et ombre comprises.
+   Seule correction nécessaire, la hauteur : dans les autres lignes c'est .rowAction
+   (min-height: 44px) qui donne sa hauteur à la carte, et « Hors projet » n'a pas de boutons.
+   On reporte donc la même contrainte sur son libellé — le même 44px, pas une valeur magique
+   recalculée — pour une hauteur de carte identique au pixel. */
+.projectCard[data-pinned="true"] .projectName {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 .projectName {
